@@ -1,0 +1,925 @@
+<!-- STATS CARDS GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <!-- Stat 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Geral</p>
+                            <h3 class="text-xl font-bold text-slate-800 mt-1">R$ 48.250,00</h3>
+                        </div>
+                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                            <i class="fa-solid fa-wallet text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-emerald-600 mt-2 font-medium"><i class="fa-solid fa-arrow-up mr-1"></i> +8.2% este mês</p>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Receitas Mês</p>
+                            <h3 class="text-xl font-bold text-slate-800 mt-1">R$ 32.100,00</h3>
+                        </div>
+                        <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                            <i class="fa-solid fa-money-bill-trend-up text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Previsto: R$ 35.000,00</p>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Despesas Mês</p>
+                            <h3 class="text-xl font-bold text-slate-800 mt-1">R$ 14.850,00</h3>
+                        </div>
+                        <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+                            <i class="fa-solid fa-receipt text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-rose-600 mt-2 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 3 pendentes</p>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inadimplência</p>
+                            <h3 class="text-xl font-bold text-slate-800 mt-1">6,4%</h3>
+                        </div>
+                        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                            <i class="fa-solid fa-chart-pie text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Meta: abaixo de 5%</p>
+                </div>
+
+                <!-- Stat 5: Taxa de Mudança (Novo) -->
+                <div class="bg-white rounded-xl shadow-sm border border-amber-200 bg-amber-50/20 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wider text-amber-700">Mudanças Pendentes</p>
+                            <h3 id="dash-taxas-pendentes-val" class="text-xl font-bold text-amber-900 mt-1">R$ 600,00</h3>
+                        </div>
+                        <div class="p-3 bg-amber-100 text-amber-700 rounded-xl">
+                            <i class="fa-solid fa-truck-ramp-box text-xl"></i>
+                        </div>
+                    </div>
+                    <p id="dash-taxas-pendentes-qtd" class="text-xs text-amber-700 mt-2 font-medium"><i class="fa-solid fa-clock mr-1"></i> 2 inquilinos a pagar</p>
+                </div>
+            </div>
+
+            <!-- DASHBOARD ALERTS AND CONTENT -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Mudanças Pendentes Quick List (NOVO) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-truck-moving text-amber-600"></i> Taxas de Mudança Pendentes
+                        </h3>
+                        <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium" id="badge-taxas-pendentes-count">2 pendentes</span>
+                    </div>
+                    <div class="space-y-3" id="dash-lista-taxas-mudanca">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+
+                <!-- Pendências Financeiras -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-rose-500"></i> Contas a Vencer Hoje
+                        </h3>
+                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-medium">2 contas</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">COPEL - Energia Áreas Comuns</p>
+                                    <p class="text-[10px] text-slate-500">Vencimento: Hoje</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-800">R$ 1.845,20</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">
+                                    <i class="fa-solid fa-[#00A3E0] fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">Manutenção dos Elevadores</p>
+                                    <p class="text-[10px] text-slate-500">Vencimento: Hoje</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-800">R$ 650,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Últimos Alertas de Estoque -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Reposição de Estoque
+                        </h3>
+                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Crítico</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">Lâmpada LED 15W E27</p>
+                                    <p class="text-[10px] text-slate-500">Atual: 2 unid (Mín: 5)</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded">Repor urgente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- TOP BAR & CONTENT AREA -->
+        <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+
+            <!-- TOP NAVBAR -->
+            <header class="bg-slate-950 border-b border-slate-800 h-16 px-6 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    <h2 class="text-base font-semibold text-slate-200" id="current-page-title">Dashboard & DRE Financeiro</h2>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-slate-400">
+                    <span class="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Condomínio Bravo Residencial
+                    </span>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT DISPLAY AREA -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-900 custom-scrollbar text-slate-800">
+
+                <!-- SECTION 1: DASHBOARD & DRE -->
+                <section id="sec-dashboard" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase text-slate-400">Saldo Atual</span>
+                            <div class="text-2xl font-bold text-slate-800 mt-1" id="dash-saldo">R$ 48.520,00</div>
+                            <span class="text-xs text-emerald-600 font-medium mt-1 inline-block"><i class="fas fa-arrow-up mr-1"></i> +4.2% em relação ao mês anterior</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase text-slate-400">Receita do Mês</span>
+                            <div class="text-2xl font-bold text-emerald-600 mt-1" id="dash-receita">R$ 32.400,00</div>
+                            <span class="text-xs text-slate-400 mt-1 block">94% das cotas quitadas</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase text-slate-400">Despesas do Mês</span>
+                            <div class="text-2xl font-bold text-rose-600 mt-1" id="dash-despesa">R$ 18.250,00</div>
+                            <span class="text-xs text-slate-400 mt-1 block">Dentro do orçamento previsto</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-xs font-semibold uppercase text-slate-400">Taxas de Mudança (Mês)</span>
+                            <div class="text-2xl font-bold text-blue-600 mt-1" id="dash-taxa-mudanca">R$ 1.200,00</div>
+                            <span class="text-xs text-blue-600 font-medium mt-1 block">3 Mudanças confirmadas</span>
+                        </div>
+                    </div>
+
+                    <!-- DRE SIMPLIFICADO -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b pb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Demonstrativo do Resultado do Exercício (DRE)</h3>
+                                <p class="text-xs text-slate-500">Resumo financeiro operacional do condomínio</p>
+                            </div>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg">Mês Atual</span>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center p-3 bg-emerald-50 text-emerald-900 rounded-xl font-semibold">
+                                <span>(+) Receita Operacional Bruta (Cotas + Taxas de Mudança)</span>
+                                <span>R$ 33.600,00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-rose-50 text-rose-900 rounded-xl font-semibold">
+                                <span>(-) Despesas Operacionais (Manutenção, Portaria, Limpeza)</span>
+                                <span>R$ 18.250,00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-100 text-slate-800 rounded-xl font-bold text-base border">
+                                <span>(=) Resultado Líquido do Período</span>
+                                <span class="text-emerald-700">R$ 15.350,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: MORADORES & INQUILINOS -->
+                <section id="sec-moradores" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800">Cadastro de Moradores & Inquilinos</h3>
+                            <p class="text-sm text-slate-500">Gestão de ocupantes, contatos e controle da taxa de mudança</p>
+                        </div>
+                        <button onclick="openModal('modal-morador')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                            <i class="fas fa-user-plus"></i> Novo Morador
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b text-slate-600 font-medium">
+                                    <tr>
+                                        <th class="p-3">Unidade</th>
+                                        <th class="p-3">Nome Completo</th>
+                                        <th class="p-3">Tipo</th>
+                                        <th class="p-3">Contato</th>
+                                        <th class="p-3">Taxa de Mudança</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-moradores" class="divide-y divide-slate-100">
+                                    <!-- Inserido dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: FORNECEDORES -->
+                <section id="sec-fornecedores" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800">Fornecedores & Prestadores</h3>
+                            <p class="text-sm text-slate-500">Consulta de CNPJ automática via BrasilAPI</p>
+                        </div>
+                        <button onclick="openModal('modal-fornecedor')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                            <i class="fas fa-plus"></i> Novo Fornecedor
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b text-slate-600 font-medium">
+                                    <tr>
+                                        <th class="p-3">Nome / Razão Social</th>
+                                        <th class="p-3">CNPJ / CPF</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3">Contato</th>
+                                        <th class="p-3">Endereço</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-fornecedores" class="divide-y divide-slate-100">
+                                    <!-- Inserido dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: ESTOQUE E INVENTÁRIO -->
+                <section id="sec-estoque" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800">Estoque & Inventário</h3>
+                            <p class="text-sm text-slate-500">Produtos, fotos do material e saldo auditado</p>
+                        </div>
+                        <button onclick="openModal('modal-produto')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                            <i class="fas fa-box-open"></i> Cadastrar Produto
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b text-slate-600 font-medium">
+                                    <tr>
+                                        <th class="p-3">Foto</th>
+                                        <th class="p-3">Produto / Código</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3">Qtd. Atual</th>
+                                        <th class="p-3">Preço Un.</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-estoque" class="divide-y divide-slate-100">
+                                    <!-- Inserido dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5: REFORMULADA GESTÃO DE DOCUMENTOS E ANEXOS -->
+                <section id="sec-documentos" class="hidden space-y-6">
+                    
+                    <!-- CABEÇALHO & BOTÃO NOVO DOCUMENTO -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fas fa-folder-open text-emerald-600"></i> Gestão de Documentos & Anexos
+                            </h3>
+                            <p class="text-sm text-slate-500">Organização por grupos, contrato, atas, laudos e comprovantes com anexos em tempo real</p>
+                        </div>
+                        <button onclick="novoDocumento()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                            <i class="fas fa-cloud-upload-alt"></i> Anexar Documento
+                        </button>
+                    </div>
+
+                    <!-- BARRA DE FILTROS E GRUPOS/CATEGORIAS -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+                            
+                            <!-- PESQUISA POR TÍTULO -->
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+                                <input type="text" id="doc-search-input" oninput="renderDocumentos()" placeholder="Buscar por título ou descrição do documento..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                            </div>
+
+                            <!-- FILTRO POR GRUPO / CATEGORIA -->
+                            <div class="w-full md:w-64">
+                                <select id="doc-group-filter" onchange="renderDocumentos()" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700 font-medium">
+                                    <option value="TODOS">📁 Todos os Grupos</option>
+                                    <option value="Atas e Convenções">📄 Atas e Convenções</option>
+                                    <option value="Contratos e Aditivos">📑 Contratos e Aditivos</option>
+                                    <option value="Comprovantes e Notas Fiscais">🧾 Comprovantes e NFs</option>
+                                    <option value="Manutenção e Laudos">🛠️ Manutenção e Laudos</option>
+                                    <option value="Certidões e Seguros">🛡️ Certidões e Seguros</option>
+                                    <option value="Outros Documentos">📌 Outros Documentos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- CARDS/BOTÕES RÁPIDOS DOS GRUPOS -->
+                        <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-medium custom-scrollbar">
+                            <button onclick="setGrupoFiltro('TODOS')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap active-badge">
+                                Todos os Grupos (<span id="cnt-doc-todos">0</span>)
+                            </button>
+                            <button onclick="setGrupoFiltro('Atas e Convenções')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 whitespace-nowrap">
+                                📜 Atas & Convenções (<span id="cnt-doc-atas">0</span>)
+                            </button>
+                            <button onclick="setGrupoFiltro('Contratos e Aditivos')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 whitespace-nowrap">
+                                📑 Contratos (<span id="cnt-doc-contratos">0</span>)
+                            </button>
+                            <button onclick="setGrupoFiltro('Comprovantes e Notas Fiscais')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 whitespace-nowrap">
+                                🧾 Comprovantes & NFs (<span id="cnt-doc-comprovantes">0</span>)
+                            </button>
+                            <button onclick="setGrupoFiltro('Manutenção e Laudos')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 whitespace-nowrap">
+                                🛠️ Laudos e Vistorias (<span id="cnt-doc-laudos">0</span>)
+                            </button>
+                            <button onclick="setGrupoFiltro('Certidões e Seguros')" class="doc-group-badge px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 whitespace-nowrap">
+                                🛡️ Seguros (<span id="cnt-doc-seguros">0</span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TABELA / LISTA DE DOCUMENTOS -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b text-slate-600 font-medium">
+                                    <tr>
+                                        <th class="p-3.5">Grupo / Categoria</th>
+                                        <th class="p-3.5">Título do Documento</th>
+                                        <th class="p-3.5">Data do Doc.</th>
+                                        <th class="p-3.5">Anexo / Arquivo</th>
+                                        <th class="p-3.5 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-documentos" class="divide-y divide-slate-100">
+                                    <!-- Inserido dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6: USUÁRIOS DO SISTEMA -->
+                <section id="sec-usuarios" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-800">Usuários & Controles de Acesso</h3>
+                            <p class="text-sm text-slate-500">Gerenciamento de credenciais e permissões operacionais</p>
+                        </div>
+                        <button onclick="openModal('modal-usuario')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
+                            <i class="fas fa-user-shield"></i> Novo Usuário
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 border-b text-slate-600 font-medium">
+                                    <tr>
+                                        <th class="p-3">Usuário / Login</th>
+                                        <th class="p-3">Nome Completo</th>
+                                        <th class="p-3">Perfil de Acesso</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-usuarios" class="divide-y divide-slate-100">
+                                    <!-- Inserido dinamicamente via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAIS DO SISTEMA -->
+
+    <!-- MODAL DOCUMENTO (NOVO / EDITAR) -->
+    <div id="modal-documento" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="modal-doc-title" class="text-lg font-bold text-slate-800">Anexar Novo Documento</h3>
+                <button onclick="closeModal('modal-documento')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <form id="form-documento" onsubmit="salvarDocumento(event)" class="space-y-4">
+                <input type="hidden" id="doc-id">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Grupo / Categoria do Documento *</label>
+                    <select id="doc-grupo" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 font-medium">
+                        <option value="Atas e Convenções">📄 Atas e Convenções</option>
+                        <option value="Contratos e Aditivos">📑 Contratos e Aditivos</option>
+                        <option value="Comprovantes e Notas Fiscais">🧾 Comprovantes e Notas Fiscais</option>
+                        <option value="Manutenção e Laudos">🛠️ Manutenção e Laudos</option>
+                        <option value="Certidões e Seguros">🛡️ Certidões e Seguros</option>
+                        <option value="Outros Documentos">📌 Outros Documentos</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Título do Documento *</label>
+                    <input type="text" id="doc-titulo" required placeholder="Ex: Contrato de Manutenção de Elevadores 2026" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Data do Documento *</label>
+                        <input type="date" id="doc-data" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Validade (Se houver)</label>
+                        <input type="date" id="doc-validade" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Arquivo Anexo (PDF, Imagem ou Doc)</label>
+                    <input type="file" id="doc-file-input" onchange="previewDocFile(this)" accept="image/*,application/pdf,.doc,.docx" class="w-full border rounded-lg p-2 text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    
+                    <!-- PREVISUALIZAÇÃO DO ANEXO -->
+                    <div id="doc-file-preview-box" class="mt-3 p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300 hidden text-xs">
+                        <div class="flex items-center gap-3">
+                            <i id="doc-file-icon" class="fas fa-file-alt text-2xl text-emerald-600"></i>
+                            <div class="flex-1 truncate">
+                                <p id="doc-file-name" class="font-semibold text-slate-800 truncate">arquivo.pdf</p>
+                                <p id="doc-file-size" class="text-slate-400 text-[10px]">0 KB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Observações / Descrição</label>
+                    <textarea id="doc-obs" rows="2" placeholder="Informações adicionais sobre este documento..." class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-documento')" class="px-4 py-2 border rounded-lg text-sm text-slate-600 hover:bg-slate-100 font-medium">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-sm">Salvar Documento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DETALHES / VISUALIZAÇÃO DE DOCUMENTO -->
+    <div id="modal-view-doc" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <span id="view-doc-badge" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">Grupo</span>
+                    <h3 id="view-doc-title" class="text-lg font-bold text-slate-800">Título do Documento</h3>
+                </div>
+                <button onclick="closeModal('modal-view-doc')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-700">
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
+                    <div>
+                        <span class="text-slate-400 block font-semibold uppercase">Data de Registro:</span>
+                        <span id="view-doc-data" class="font-bold text-slate-800">-</span>
+            <!-- TABELA DE MORADORES -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                                <th class="p-4">Morador</th>
+                                <th class="p-4">Bloco / AP</th>
+                                <th class="p-4">Tipo</th>
+                                <th class="p-4">Contato</th>
+                                <th class="p-4">Taxa de Mudança</th>
+                                <th class="p-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-moradores-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+                            <!-- Renderizado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    <!-- MODAL CADASTRO / EDIÇÃO DE MORADOR -->
+    <div id="modal-morador" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 animate-fade-in">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 id="modal-morador-titulo" class="text-lg font-bold text-slate-800">Cadastrar Morador</h3>
+                <button onclick="fecharModal('modal-morador')" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <form id="form-morador" onsubmit="salvarMorador(event)" class="mt-4 space-y-4">
+                <input type="hidden" id="morador-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo</label>
+                    <input type="text" id="morador-nome" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" placeholder="Ex: Roberto Carlos Silva">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Bloco</label>
+                        <input type="text" id="morador-bloco" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" placeholder="Bloco A">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Apartamento</label>
+                        <input type="text" id="morador-ap" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" placeholder="104">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de Residente</label>
+                        <select id="morador-tipo" onchange="toggleCamposInquilino()" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                            <option value="Proprietário">Proprietário</option>
+                            <option value="Inquilino">Inquilino</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Telefone / WhatsApp</label>
+                        <input type="text" id="morador-telefone" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" placeholder="(41) 99999-9999">
+                    </div>
+                </div>
+
+                <!-- BLOCO TAXA DE MUDANÇA (CONDICIONAL INQUILINO) -->
+                <div id="bloco-taxa-mudanca" class="p-4 bg-amber-50/60 border border-amber-200 rounded-xl space-y-3 hidden">
+                    <div class="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                        <i class="fa-solid fa-truck-ramp-box text-amber-600"></i> Taxa de Mudança (Inquilino)
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Cobrar Taxa?</label>
+                            <select id="morador-taxa-opcao" onchange="atualizarOpcaoTaxa()" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                                <option value="Sim">Sim</option>
+                                <option value="Não">Não / Isento</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Valor da Taxa (R$)</label>
+                            <input type="number" step="0.01" id="morador-taxa-valor" value="300.00" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div id="sub-bloco-taxa-detalhes" class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Status Pagamento</label>
+                            <select id="morador-taxa-status" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Pago">Pago</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Data Reg./Pgto</label>
+                            <input type="date" id="morador-taxa-data" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-amber-500 focus:outline-none text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modal-morador')" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium shadow-sm">Salvar Dados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FORNECEDOR COM BRASILAPI -->
+    <div id="modal-fornecedor" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Novo Fornecedor</h3>
+            <form onsubmit="salvarFornecedor(event)" class="space-y-3">
+                <input type="hidden" id="fornecedor-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">CNPJ</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="fornecedor-cnpj" placeholder="00.000.000/0000-00" required class="flex-1 border rounded-lg p-2 text-sm">
+                        <button type="button" onclick="buscarCNPJ()" id="btn-busca-cnpj" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1">
+                            <i class="fas fa-search" id="icon-busca-cnpj"></i> Buscar CNPJ
+                        </button>
+                    </div>
+                </div>
+                <input type="text" id="fornecedor-nome" placeholder="Razão Social / Nome Fantasia *" required class="w-full border rounded-lg p-2 text-sm">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="fornecedor-categoria" placeholder="Categoria/Ramo *" required class="border rounded-lg p-2 text-sm">
+                    <input type="text" id="fornecedor-telefone" placeholder="Telefone" class="border rounded-lg p-2 text-sm">
+                </div>
+                <input type="email" id="fornecedor-email" placeholder="E-mail" class="w-full border rounded-lg p-2 text-sm">
+                <input type="text" id="fornecedor-endereco" placeholder="Endereço Completo" class="w-full border rounded-lg p-2 text-sm">
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-fornecedor')" class="px-4 py-2 border rounded-lg text-sm text-slate-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PRODUTO / INVENTÁRIO -->
+    <div id="modal-produto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Novo Produto / Item</h3>
+            <form onsubmit="salvarProduto(event)" class="space-y-3">
+                <input type="text" id="prod-nome" placeholder="Nome do Item *" required class="w-full border rounded-lg p-2 text-sm">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="prod-categoria" placeholder="Categoria *" required class="border rounded-lg p-2 text-sm">
+                    <input type="number" id="prod-qtd" placeholder="Qtd. Inicial" value="1" class="border rounded-lg p-2 text-sm">
+                </div>
+                <input type="number" step="0.01" id="prod-preco" placeholder="Preço Unitário (R$)" class="w-full border rounded-lg p-2 text-sm">
+                
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-produto')" class="px-4 py-2 border rounded-lg text-sm text-slate-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL USUÁRIO -->
+    <div id="modal-usuario" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">Novo Usuário do Sistema</h3>
+            <form onsubmit="salvarUsuario(event)" class="space-y-3">
+                <input type="text" id="usr-login-input" placeholder="Login / Usuário *" required class="w-full border rounded-lg p-2 text-sm">
+                <input type="text" id="usr-nome-input" placeholder="Nome Completo *" required class="w-full border rounded-lg p-2 text-sm">
+                <select id="usr-perfil" class="w-full border rounded-lg p-2 text-sm">
+                    <option value="Administrador">Administrador</option>
+                    <option value="Síndico">Síndico</option>
+                    <option value="Portaria">Portaria / Operacional</option>
+                    <option value="Conselho">Conselho Fiscal</option>
+                </select>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-usuario')" class="px-4 py-2 border rounded-lg text-sm text-slate-600">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">Salvar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APLICAÇÃO -->
+    <script>
+        // DADOS MOCKADOS INICIAIS DA APLICAÇÃO
+        let moradores = [
+            { id: 1, nome: "Carlos Eduardo Santos", bloco: "Bloco A", ap: "101", tipo: "Proprietário", telefone: "(41) 98888-1111", taxaMudanca: { possui: false, valor: 0, status: "Isento", data: "" } },
+            { id: 2, nome: "Fernanda Lima", bloco: "Bloco A", ap: "203", tipo: "Inquilino", telefone: "(41) 99977-2222", taxaMudanca: { possui: true, valor: 300.00, status: "Pendente", data: "2026-10-25" } },
+            { id: 3, nome: "Marcelo Souza", bloco: "Bloco B", ap: "502", tipo: "Inquilino", telefone: "(41) 99111-3333", taxaMudanca: { possui: true, valor: 300.00, status: "Pendente", data: "2026-10-22" } },
+            { id: 4, nome: "Juliana Paes", bloco: "Bloco B", ap: "304", tipo: "Inquilino", telefone: "(41) 98765-4321", taxaMudanca: { possui: true, valor: 300.00, status: "Pago", data: "2026-10-01" } }
+        ];
+
+        // LÓGICA DE EXIBIÇÃO DA TAXA DE MUDANÇA NO FORMULÁRIO
+        function toggleCamposInquilino() {
+            const tipo = document.getElementById('morador-tipo').value;
+            const blocoTaxa = document.getElementById('bloco-taxa-mudanca');
+            if (tipo === 'Inquilino') {
+                blocoTaxa.classList.remove('hidden');
+            } else {
+                blocoTaxa.classList.add('hidden');
+            }
+        }
+
+        function atualizarOpcaoTaxa() {
+            const opcao = document.getElementById('morador-taxa-opcao').value;
+            const subBloco = document.getElementById('sub-bloco-taxa-detalhes');
+            const valInput = document.getElementById('morador-taxa-valor');
+            if (opcao === 'Não') {
+                subBloco.classList.add('hidden');
+                valInput.disabled = true;
+                valInput.value = "0.00";
+            } else {
+                subBloco.classList.remove('hidden');
+                valInput.disabled = false;
+                if(parseFloat(valInput.value) === 0) valInput.value = "300.00";
+            }
+        }
+
+        // RENDERIZAÇÃO DA TABELA DE MORADORES
+        function renderizarMoradores() {
+            const tbody = document.getElementById('tabela-moradores-body');
+            tbody.innerHTML = '';
+
+            moradores.forEach(m => {
+                let badgeTaxa = '';
+                if (m.tipo === 'Proprietário' || !m.taxaMudanca || !m.taxaMudanca.possui) {
+                    badgeTaxa = `<span class="inline-flex items-center gap-1 text-xs text-slate-500 font-medium px-2 py-0.5 rounded-full bg-slate-100"><i class="fa-solid fa-minus text-[10px]"></i> Isento / N/A</span>`;
+                } else if (m.taxaMudanca.status === 'Pago') {
+                    badgeTaxa = `<span class="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200"><i class="fa-solid fa-circle-check text-[10px]"></i> Taxa Paga (R$ ${m.taxaMudanca.valor.toFixed(2)})</span>`;
+                } else {
+                    badgeTaxa = `<div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 text-xs text-amber-800 font-bold px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300"><i class="fa-solid fa-clock text-[10px]"></i> Pendente: R$ ${m.taxaMudanca.valor.toFixed(2)}</span>
+                        <button onclick="darBaixaTaxaMudanca(${m.id})" title="Dar Baixa no Pagamento" class="px-2 py-0.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded font-medium shadow-xs transition">Baixar</button>
+                    </div>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition';
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-slate-800">${m.nome}</td>
+                    <td class="p-4 text-slate-600">${m.bloco} - AP ${m.ap}</td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 text-xs rounded-full font-semibold ${m.tipo === 'Proprietário' ? 'bg-indigo-50 text-indigo-700' : 'bg-purple-50 text-purple-700'}">${m.tipo}</span>
+                    </td>
+                    <td class="p-4 text-slate-600">${m.telefone}</td>
+                    <td class="p-4">${badgeTaxa}</td>
+                    <td class="p-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="abrirModalMorador(${m.id})" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Editar Morador">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="excluirMorador(${m.id})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Morador">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            atualizarDashboardTaxas();
+        }
+
+        // BAIXA RÁPIDA NA TAXA DE MUDANÇA
+        function darBaixaTaxaMudanca(id) {
+            const morador = moradores.find(m => m.id === id);
+            if (morador && morador.taxaMudanca) {
+                morador.taxaMudanca.status = 'Pago';
+                morador.taxaMudanca.data = new Date().toISOString().split('T')[0];
+                mostrarNotificacao(`Baixa de Taxa de Mudança realizada com sucesso para ${morador.nome}!`);
+                renderizarMoradores();
+            }
+        }
+
+        // ATUALIZAÇÃO DO CARDE E LISTA RÁPIDA NO DASHBOARD
+        function atualizarDashboardTaxas() {
+            const pendentes = moradores.filter(m => m.tipo === 'Inquilino' && m.taxaMudanca && m.taxaMudanca.possui && m.taxaMudanca.status === 'Pendente');
+            const valorTotal = pendentes.reduce((acc, curr) => acc + (curr.taxaMudanca.valor || 0), 0);
+
+            const elemVal = document.getElementById('dash-taxas-pendentes-val');
+            const elemQtd = document.getElementById('dash-taxas-pendentes-qtd');
+            const badgeCount = document.getElementById('badge-taxas-pendentes-count');
+            const containerLista = document.getElementById('dash-lista-taxas-mudanca');
+
+            if (elemVal) elemVal.innerText = `R$ ${valorTotal.toFixed(2)}`;
+            if (elemQtd) elemQtd.innerHTML = `<i class="fa-solid fa-clock mr-1"></i> ${pendentes.length} inquilino(s) a pagar`;
+            if (badgeCount) badgeCount.innerText = `${pendentes.length} pendente(s)`;
+
+            if (containerLista) {
+                containerLista.innerHTML = '';
+                if (pendentes.length === 0) {
+                    containerLista.innerHTML = `<div class="p-3 text-center text-xs text-slate-500 bg-slate-50 rounded-lg">Nenhuma taxa de mudança pendente no momento!</div>`;
+                } else {
+                    pendentes.forEach(p => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-3 rounded-lg bg-amber-50/50 border border-amber-100 hover:bg-amber-100/50 transition';
+                        item.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+                                    <i class="fa-solid fa-truck-ramp-box"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-800">${p.nome} (${p.bloco} - ${p.ap})</p>
+                                    <p class="text-[10px] text-slate-500">Prev: ${p.taxaMudanca.data || 'A definir'}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-amber-900">R$ ${p.taxaMudanca.valor.toFixed(2)}</span>
+                                <button onclick="darBaixaTaxaMudanca(${p.id})" class="px-2 py-1 text-[11px] bg-emerald-600 text-white rounded font-medium hover:bg-emerald-700 transition">Baixar</button>
+                            </div>
+                        `;
+                        containerLista.appendChild(item);
+                    });
+                }
+            }
+        }
+
+        // ABRIR MODAL CADASTRO / EDIÇÃO DE MORADOR
+        function abrirModalMorador(id = null) {
+            document.getElementById('form-morador').reset();
+            document.getElementById('morador-id').value = '';
+            document.getElementById('modal-morador-titulo').innerText = id ? 'Editar Morador' : 'Cadastrar Morador';
+
+            if (id) {
+                const morador = moradores.find(m => m.id === id);
+                if (morador) {
+                    document.getElementById('morador-id').value = morador.id;
+                    document.getElementById('morador-nome').value = morador.nome;
+                    document.getElementById('morador-bloco').value = morador.bloco;
+                    document.getElementById('morador-ap').value = morador.ap;
+                    document.getElementById('morador-tipo').value = morador.tipo;
+                    document.getElementById('morador-telefone').value = morador.telefone;
+
+                    if (morador.tipo === 'Inquilino' && morador.taxaMudanca) {
+                        document.getElementById('morador-taxa-opcao').value = morador.taxaMudanca.possui ? 'Sim' : 'Não';
+                        document.getElementById('morador-taxa-valor').value = morador.taxaMudanca.valor;
+                        document.getElementById('morador-taxa-status').value = morador.taxaMudanca.status || 'Pendente';
+                        document.getElementById('morador-taxa-data').value = morador.taxaMudanca.data || '';
+                    }
+                }
+            }
+            toggleCamposInquilino();
+            atualizarOpcaoTaxa();
+            abrirModal('modal-morador');
+        }
+
+        // SALVAR MORADOR
+        function salvarMorador(event) {
+            event.preventDefault();
+            const id = document.getElementById('morador-id').value;
+            const nome = document.getElementById('morador-nome').value;
+            const bloco = document.getElementById('morador-bloco').value;
+            const ap = document.getElementById('morador-ap').value;
+            const tipo = document.getElementById('morador-tipo').value;
+            const telefone = document.getElementById('morador-telefone').value;
+
+            let taxaObj = { possui: false, valor: 0, status: 'Isento', data: '' };
+            if (tipo === 'Inquilino') {
+                const possuiTaxa = document.getElementById('morador-taxa-opcao').value === 'Sim';
+                taxaObj = {
+                    possui: possuiTaxa,
+                    valor: possuiTaxa ? (parseFloat(document.getElementById('morador-taxa-valor').value) || 0) : 0,
+                    status: possuiTaxa ? document.getElementById('morador-taxa-status').value : 'Isento',
+                    data: possuiTaxa ? document.getElementById('morador-taxa-data').value : ''
+                };
+            }
+
+            if (id) {
+                const m = moradores.find(item => item.id == id);
+                if (m) {
+                    m.nome = nome;
+                    m.bloco = bloco;
+                    m.ap = ap;
+                    m.tipo = tipo;
+                    m.telefone = telefone;
+                    m.taxaMudanca = taxaObj;
+                }
+                mostrarNotificacao('Morador atualizado com sucesso!');
+            } else {
+                const novoMorador = {
+                    id: Date.now(),
+                    nome, bloco, ap, tipo, telefone,
+                    taxaMudanca: taxaObj
+                };
+                moradores.push(novoMorador);
+                mostrarNotificacao('Morador cadastrado com sucesso!');
+            }
+
+            fecharModal('modal-morador');
+            renderizarMoradores();
+        }
+
+        // EXCLUIR MORADOR
+        function excluirMorador(id) {
+            abrirModalConfirmacao('Excluir Morador', 'Tem certeza que deseja remover este cadastro?', () => {
+                moradores = moradores.filter(m => m.id !== id);
+                renderizarMoradores();
+                mostrarNotificacao('Morador excluído com sucesso!');
+            });
+        }
+
+        // INICIALIZAÇÃO NO ONLOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            renderizarMoradores();
+        });
+    </script>
+</body>
+</html>
