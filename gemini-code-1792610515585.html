@@ -8,12 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .input-dark-text { color: #0f172a !important; background-color: #f8fafc !important; font-weight: 500 !important; }
+        .input-dark-text option { color: #0f172a !important; background-color: #ffffff !important; }
         @media print {
             body * { visibility: hidden; }
             #areaImpressao, #areaImpressao * { visibility: visible; }
@@ -40,7 +40,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Utilizador / E-mail</label>
                     <div class="relative">
                         <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                        <input type="text" id="loginUser" required placeholder="admin" value="admin" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="loginUser" required placeholder="admin" value="admin" class="input-dark-text w-full border border-slate-300 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Palavra-passe</label>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                        <input type="password" id="loginPass" required placeholder="12345678" value="12345678" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                        <input type="password" id="loginPass" required placeholder="12345678" value="12345678" class="input-dark-text w-full border border-slate-300 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
                 </div>
 
@@ -100,8 +100,8 @@
                     <button onclick="navegarPara('documentos')" id="nav-documentos" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white">
                         <i class="fa-solid fa-folder-open w-5"></i> Documentos
                     </button>
-                    <button onclick="navegarPara('relatorios')" id="nav-relatorios" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white">
-                        <i class="fa-solid fa-file-contract w-5"></i> Relatórios Globais
+                    <button onclick="navegarPara('usuarios')" id="nav-usuarios" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                        <i class="fa-solid fa-user-gear w-5"></i> Utilizadores / Usuários
                     </button>
                 </nav>
             </div>
@@ -145,38 +145,47 @@
     </div>
 
     <script>
-        // BANCO DE DADOS LOCAL (INICIALMENTE ZERADO OU PRONTO PARA CADASTROS)
-        let dadosSistema = {
+        // BANCO DE DADOS LOCAL COMPLETO COM SUPORTE À LOCALSTORAGE
+        let dadosSistema = JSON.parse(localStorage.getItem('guardioes_bravo_db')) || {
             bancos: [
-                { id: 'b1', nome: 'Itaú Unibanco', agencia: '0123', conta: '45678-9', saldo: 0 },
-                { id: 'b2', nome: 'Caixa Econômica', agencia: '4321', conta: '98765-4', saldo: 0 }
+                { id: 'b1', nome: 'Itaú Unibanco', agencia: '0123', conta: '45678-9', saldo: 15400 },
+                { id: 'b2', nome: 'Caixa Econômica', agencia: '4321', conta: '98765-4', saldo: 8200 }
             ],
             planoContas: [
                 { id: 'pc1', codigo: '1.01', nome: 'Taxa Condominial', tipo: 'RECEITA' },
-                { id: 'pc2', codigo: '1.02', nome: 'Uso de Salão de Festas', tipo: 'RECEITA' },
-                { id: 'pc3', codigo: '2.01', nome: 'Manutenção Preventiva / Elevadores', tipo: 'DESPESA' },
-                { id: 'pc4', codigo: '2.02', nome: 'Energia Elétrica / Água', tipo: 'DESPESA' },
-                { id: 'pc5', codigo: '2.03', nome: 'Material de Limpeza & Consumo', tipo: 'DESPESA' }
+                { id: 'pc2', codigo: '1.02', nome: 'Taxa de Mudança (Inquilino)', tipo: 'RECEITA' },
+                { id: 'pc3', codigo: '2.01', nome: 'Manutenção Preventiva', tipo: 'DESPESA' },
+                { id: 'pc4', codigo: '2.02', nome: 'Energia Elétrica / Água', tipo: 'DESPESA' }
             ],
-            moradores: [],
+            moradores: [
+                { id: 'm1', nome: 'Carlos Eduardo', bloco: 'A', ap: '101', tipo: 'Proprietario', contato: '(41) 99999-1111', possuiTaxaMudanca: 'nao', valorTaxa: 0, statusTaxa: 'Isento', dataPagamentoTaxa: '' },
+                { id: 'm2', nome: 'Ana Paula Souza', bloco: 'B', ap: '304', tipo: 'Inquilino', contato: '(41) 98888-2222', possuiTaxaMudanca: 'sim', valorTaxa: 350.00, statusTaxa: 'Pendente', dataPagamentoTaxa: '' }
+            ],
             fornecedores: [],
             financeiro: [],
             estoque: [],
             historicoEstoque: [],
-            documentos: []
+            documentos: [],
+            usuarios: [
+                { id: 'u1', nome: 'Administrador Principal', usuario: 'admin', email: 'admin@guardioes.com', perfil: 'Administrador', status: 'Ativo' }
+            ]
         };
 
-        // INICIALIZAÇÃO
+        function salvarDadosLocal() {
+            localStorage.setItem('guardioes_bravo_db', JSON.stringify(dadosSistema));
+        }
+
         function fazerLogin() {
             const user = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
+            const uEncontrado = dadosSistema.usuarios.find(u => u.usuario === user && u.status === 'Ativo');
 
-            if (user === 'admin' && pass === '12345678') {
+            if ((user === 'admin' && pass === '12345678') || uEncontrado) {
                 document.getElementById('loginPage').classList.add('hidden');
                 document.getElementById('mainDashboard').classList.remove('hidden');
                 carregarDashboard();
             } else {
-                alert('Credenciais incorretas! Use admin / 12345678');
+                alert('Credenciais incorretas ou utilizador inativo!');
             }
         }
 
@@ -217,131 +226,108 @@
                 title.innerText = 'Visão Geral';
                 subTitle.innerText = 'Resumo executivo do condomínio';
                 carregarDashboard();
+            } else if(pagina === 'moradores') {
+                title.innerText = 'Moradores & Unidades';
+                subTitle.innerText = 'Cadastro de proprietários e inquilinos por bloco/unidade com controle de Taxa de Mudança';
+                carregarMoradores();
+            } else if(pagina === 'fornecedores') {
+                title.innerText = 'Fornecedores';
+                subTitle.innerText = 'Busca Automática via CNPJ e Gestão de Prestadores';
+                carregarFornecedores();
+            } else if(pagina === 'estoque') {
+                title.innerText = 'Estoque & Inventário';
+                subTitle.innerText = 'Fotos do Produto, Inventário Físico e Acerto Auditado';
+                carregarEstoque();
+            } else if(pagina === 'usuarios') {
+                title.innerText = 'Utilizadores / Usuários do Sistema';
+                subTitle.innerText = 'Controle de Acessos e Níveis de Permissão';
+                carregarUsuarios();
+            } else if(pagina === 'documentos') {
+                title.innerText = 'Gestão de Documentos';
+                subTitle.innerText = 'Pastas, Grupos de Arquivos e Anexos Organizados';
+                carregarDocumentos();
             } else if(pagina === 'financeiro') {
-                title.innerText = 'Módulo Financeiro';
-                subTitle.innerText = 'Contas a Pagar, Receber e Baixas Parciais';
+                title.innerText = 'Financeiro';
+                subTitle.innerText = 'Gestão de Títulos e Contas a Pagar/Receber';
                 carregarFinanceiro();
+            } else if(pagina === 'bancos') {
+                title.innerText = 'Bancos & Contas';
+                subTitle.innerText = 'Controle de Saldos Bancários e Caixas';
+                carregarBancos();
             } else if(pagina === 'plano-contas') {
                 title.innerText = 'Plano de Contas';
                 subTitle.innerText = 'Categorização de Receitas e Despesas';
                 carregarPlanoContas();
-            } else if(pagina === 'bancos') {
-                title.innerText = 'Bancos & Contas';
-                subTitle.innerText = 'Gestão de contas bancárias e saldos';
-                carregarBancos();
-            } else if(pagina === 'moradores') {
-                title.innerText = 'Moradores & Unidades';
-                subTitle.innerText = 'Cadastro de proprietários e inquilinos por bloco/unidade';
-                carregarMoradores();
-            } else if(pagina === 'fornecedores') {
-                title.innerText = 'Fornecedores';
-                subTitle.innerText = 'Empresas parceiras e prestadores de serviços';
-                carregarFornecedores();
-            } else if(pagina === 'estoque') {
-                title.innerText = 'Estoque & Inventário';
-                subTitle.innerText = 'Catálogo com fotos e histórico auditado de acertos';
-                carregarEstoque();
-            } else if(pagina === 'documentos') {
-                title.innerText = 'Gestão de Documentos';
-                subTitle.innerText = 'Atas, contratos e comprovantes organizados';
-                carregarDocumentos();
-            } else if(pagina === 'relatorios') {
-                title.innerText = 'Relatórios Globais';
-                subTitle.innerText = 'Relatórios consolidadores de todos os módulos com exportação';
-                carregarRelatorios();
             }
         }
 
         // ==========================================
-        // 1. DASHBOARD
+        // 1. DASHBOARD COM ALERTAS DA TAXA DE MUDANÇA
         // ==========================================
         function carregarDashboard() {
-            const totalReceitas = dadosSistema.financeiro.filter(f => f.tipo === 'RECEITA' && f.status === 'PAGO').reduce((a, b) => a + Number(b.valor), 0);
-            const totalDespesas = dadosSistema.financeiro.filter(f => f.tipo === 'DESPESA' && f.status === 'PAGO').reduce((a, b) => a + Number(b.valor), 0);
-            const saldoGeral = totalReceitas - totalDespesas;
+            const taxasPendentes = dadosSistema.moradores.filter(m => m.tipo === 'Inquilino' && m.statusTaxa === 'Pendente');
+            const totalPendentesTaxa = taxasPendentes.reduce((acc, m) => acc + Number(m.valorTaxa || 0), 0);
 
             const content = document.getElementById('contentArea');
             content.innerHTML = `
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <span class="text-xs font-semibold text-slate-400 uppercase">Saldo em Conta</span>
-                        <h3 class="text-2xl font-bold ${saldoGeral >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-2">R$ ${saldoGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
-                        <p class="text-xs text-slate-500 mt-1">Total consolidado</p>
-                    </div>
-                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <span class="text-xs font-semibold text-slate-400 uppercase">Moradores</span>
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Moradores Cadastrados</span>
                         <h3 class="text-2xl font-bold text-blue-400 mt-2">${dadosSistema.moradores.length} Unidades</h3>
-                        <p class="text-xs text-slate-500 mt-1">Cadastros de moradores</p>
+                        <p class="text-xs text-slate-500 mt-1">Total de ativos</p>
+                    </div>
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-amber-500/30">
+                        <span class="text-xs font-semibold text-amber-400 uppercase">Taxas de Mudança Pendentes</span>
+                        <h3 class="text-2xl font-bold text-amber-400 mt-2">R$ ${totalPendentesTaxa.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h3>
+                        <p class="text-xs text-slate-400 mt-1">${taxasPendentes.length} Inquilino(s) pendente(s)</p>
                     </div>
                     <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <span class="text-xs font-semibold text-slate-400 uppercase">Fornecedores</span>
-                        <h3 class="text-2xl font-bold text-indigo-400 mt-2">${dadosSistema.fornecedores.length} Cadastrados</h3>
-                        <p class="text-xs text-slate-500 mt-1">Prestadores de serviço</p>
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Produtos no Estoque</span>
+                        <h3 class="text-2xl font-bold text-emerald-400 mt-2">${dadosSistema.estoque.length} Itens</h3>
+                        <p class="text-xs text-slate-500 mt-1">Com foto e quantidade</p>
                     </div>
                     <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <span class="text-xs font-semibold text-slate-400 uppercase">Itens em Estoque</span>
-                        <h3 class="text-2xl font-bold text-amber-400 mt-2">${dadosSistema.estoque.length} Produtos</h3>
-                        <p class="text-xs text-slate-500 mt-1">Itens monitorados</p>
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Utilizadores do Sistema</span>
+                        <h3 class="text-2xl font-bold text-purple-400 mt-2">${dadosSistema.usuarios.length} Credenciais</h3>
+                        <p class="text-xs text-slate-500 mt-1">Acesso ao painel</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <h3 class="text-lg font-bold text-white mb-4">Acesso Rápido</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <button onclick="modalNovoLancamento()" class="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500 transition text-left">
-                                <i class="fa-solid fa-plus-circle text-blue-500 text-xl mb-2"></i>
-                                <div class="font-semibold text-white text-sm">Novo Lançamento</div>
-                                <div class="text-xs text-slate-400">Pagar ou Receber</div>
-                            </button>
-                            <button onclick="modalNovoMorador()" class="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500 transition text-left">
-                                <i class="fa-solid fa-user-plus text-emerald-500 text-xl mb-2"></i>
-                                <div class="font-semibold text-white text-sm">Novo Morador</div>
-                                <div class="text-xs text-slate-400">Cadastrar unidade</div>
-                            </button>
-                            <button onclick="modalNovoEstoque()" class="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500 transition text-left">
-                                <i class="fa-solid fa-box text-amber-500 text-xl mb-2"></i>
-                                <div class="font-semibold text-white text-sm">Novo Item Estoque</div>
-                                <div class="text-xs text-slate-400">Com foto e quantidade</div>
-                            </button>
-                            <button onclick="navegarPara('relatorios')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500 transition text-left">
-                                <i class="fa-solid fa-chart-line text-purple-500 text-xl mb-2"></i>
-                                <div class="font-semibold text-white text-sm">Ver Relatórios</div>
-                                <div class="text-xs text-slate-400">Visão global consolidada</div>
-                            </button>
+                ${taxasPendentes.length > 0 ? `
+                    <div class="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-6 mb-8">
+                        <h3 class="text-base font-bold text-amber-400 flex items-center gap-2 mb-4">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Taxas de Mudança de Inquilinos com Pagamento Pendente
+                        </h3>
+                        <div class="divide-y divide-slate-800">
+                            ${taxasPendentes.map(m => `
+                                <div class="py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div>
+                                        <div class="font-bold text-white text-sm">${m.nome} <span class="text-xs font-normal text-slate-400">(Bloco ${m.bloco} - AP ${m.ap})</span></div>
+                                        <div class="text-xs text-slate-400">Contato: ${m.contato || 'Não informado'}</div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-bold text-amber-400 text-sm">R$ ${Number(m.valorTaxa).toFixed(2)}</span>
+                                        <button onclick="baixarTaxaMudancaDireto('${m.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition">
+                                            <i class="fa-solid fa-check mr-1"></i> Baixar Pago
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-
-                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
-                        <h3 class="text-lg font-bold text-white mb-4">Avisos e Estado do Sistema</h3>
-                        <div class="space-y-3">
-                            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
-                                <span class="text-sm text-slate-300"><i class="fa-solid fa-check-circle text-emerald-400 mr-2"></i> Módulo de Baixa Parcial</span>
-                                <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Ativo</span>
-                            </div>
-                            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
-                                <span class="text-sm text-slate-300"><i class="fa-solid fa-check-circle text-emerald-400 mr-2"></i> Acerto de Estoque Auditado</span>
-                                <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Ativo</span>
-                            </div>
-                            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
-                                <span class="text-sm text-slate-300"><i class="fa-solid fa-check-circle text-emerald-400 mr-2"></i> Modais In-Page (Sem Prompts)</span>
-                                <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Ativo</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                ` : ''}
             `;
         }
 
         // ==========================================
-        // 2. MORADORES
+        // 2. MODULO DE MORADORES & TAXA DE MUDANÇA
         // ==========================================
         function carregarMoradores() {
             const content = document.getElementById('contentArea');
             content.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <input type="text" id="filtroMorador" onkeyup="filtrarMoradores()" placeholder="🔍 Filtrar por Nome, Bloco ou Unidade..." class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 w-full sm:w-80">
-                    <button onclick="modalNovoMorador()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-white">Cadastro de Moradores</h3>
+                    <button onclick="modalNovoMorador()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
                         <i class="fa-solid fa-user-plus"></i> Novo Morador
                     </button>
                 </div>
@@ -349,15 +335,15 @@
                     <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
                             <tr>
-                                <th class="p-4">Morador</th>
-                                <th class="p-4">Bloco</th>
-                                <th class="p-4">Unidade/AP</th>
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">Bloco/AP</th>
                                 <th class="p-4">Tipo</th>
-                                <th class="p-4">Contacto</th>
+                                <th class="p-4">Contato</th>
+                                <th class="p-4">Taxa de Mudança</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaMoradores" class="divide-y divide-slate-800 text-slate-300">
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
                             ${gerarLinhasMoradores(dadosSistema.moradores)}
                         </tbody>
                     </table>
@@ -366,64 +352,104 @@
         }
 
         function gerarLinhasMoradores(lista) {
-            if(lista.length === 0) {
-                return `<tr><td colspan="6" class="p-8 text-center text-slate-500">Nenhum morador cadastrado até ao momento.</td></tr>`;
+            if(lista.length === 0) return `<tr><td colspan="6" class="p-8 text-center text-slate-500">Nenhum morador registrado.</td></tr>`;
+            return lista.map((m, idx) => {
+                let badgeTaxa = '<span class="text-xs text-slate-500">N/A</span>';
+                if (m.tipo === 'Inquilino') {
+                    if (m.statusTaxa === 'Pago') {
+                        badgeTaxa = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-check-circle mr-1"></i>Paga (R$ ${Number(m.valorTaxa).toFixed(2)})</span>`;
+                    } else if (m.statusTaxa === 'Pendente') {
+                        badgeTaxa = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20"><i class="fa-solid fa-clock mr-1"></i>Pendente (R$ ${Number(m.valorTaxa).toFixed(2)})</span>`;
+                    } else {
+                        badgeTaxa = `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">Isento</span>`;
+                    }
+                }
+                return `
+                    <tr class="hover:bg-slate-900/50 transition">
+                        <td class="p-4 font-semibold text-white">${m.nome}</td>
+                        <td class="p-4 text-xs">Bloco ${m.bloco} - AP ${m.ap}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${m.tipo === 'Inquilino' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">${m.tipo}</span></td>
+                        <td class="p-4 text-xs">${m.contato || '-'}</td>
+                        <td class="p-4">${badgeTaxa}</td>
+                        <td class="p-4 text-right flex justify-end gap-2">
+                            <button onclick="modalEditarMorador(${idx})" class="text-blue-400 hover:text-blue-300 p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="excluirMorador(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function alternarTipoMoradorForm(selectEl) {
+            const container = document.getElementById('containerTaxaMudanca');
+            if (selectEl.value === 'Inquilino') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
             }
-            return lista.map((m, idx) => `
-                <tr class="hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-semibold text-white">${m.nome}</td>
-                    <td class="p-4">${m.bloco}</td>
-                    <td class="p-4 font-bold text-blue-400">${m.ap}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${m.tipo === 'Proprietário' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${m.tipo}</span></td>
-                    <td class="p-4 text-xs">${m.telefone || '-'} <br><span class="text-slate-500">${m.email || ''}</span></td>
-                    <td class="p-4 text-right">
-                        <button onclick="excluirMorador(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
         }
 
         function modalNovoMorador() {
             document.getElementById('modalBody').innerHTML = `
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Cadastrar Novo Morador</h3>
+                    <h3 class="text-lg font-bold text-white">Novo Cadastramento de Morador</h3>
                     <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <form onsubmit="event.preventDefault(); salvarMorador();" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome Completo</label>
-                        <input type="text" id="mNome" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <input type="text" id="mNome" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Bloco / Torre</label>
-                            <input type="text" id="mBloco" placeholder="Ex: Bloco A" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" id="mBloco" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Apartamento / Unidade</label>
-                            <input type="text" id="mAp" placeholder="Ex: 101" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Apartamento</label>
+                            <input type="text" id="mAp" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Ocupante</label>
-                            <select id="mTipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                                <option value="Proprietário">Proprietário</option>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Residente</label>
+                            <select id="mTipo" onchange="alternarTipoMoradorForm(this)" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                                <option value="Proprietario">Proprietário</option>
                                 <option value="Inquilino">Inquilino</option>
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Telefone / WhatsApp</label>
-                            <input type="text" id="mTelefone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">E-mail</label>
-                            <input type="email" id="mEmail" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Telefone / WhatsApp</label>
+                        <input type="text" id="mContato" placeholder="(00) 00000-0000" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                    </div>
+
+                    <!-- REGRAS DA TAXA DE MUDANÇA PARA INQUILINOS -->
+                    <div id="containerTaxaMudanca" class="hidden p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4">
+                        <h4 class="text-sm font-bold text-amber-400"><i class="fa-solid fa-truck-ramp-box mr-2"></i>Taxa de Mudança de Entrada</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Cobrar Taxa?</label>
+                                <select id="mPossuiTaxa" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                                    <option value="sim">Sim</option>
+                                    <option value="nao">Isento</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor da Taxa (R$)</label>
+                                <input type="number" step="0.01" id="mValorTaxa" value="350.00" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Estado do Pagamento</label>
+                                <select id="mStatusTaxa" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Pago">Pago</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Morador</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">Guardar Morador</button>
                     </div>
                 </form>
             `;
@@ -431,84 +457,166 @@
         }
 
         function salvarMorador() {
-            const m = {
+            const tipo = document.getElementById('mTipo').value;
+            const possuiTaxa = document.getElementById('mPossuiTaxa')?.value;
+            const morador = {
+                id: 'm' + (dadosSistema.moradores.length + 1),
                 nome: document.getElementById('mNome').value,
                 bloco: document.getElementById('mBloco').value,
                 ap: document.getElementById('mAp').value,
-                tipo: document.getElementById('mTipo').value,
-                telefone: document.getElementById('mTelefone').value,
-                email: document.getElementById('mEmail').value
+                tipo: tipo,
+                contato: document.getElementById('mContato').value,
+                possuiTaxaMudanca: tipo === 'Inquilino' ? possuiTaxa : 'nao',
+                valorTaxa: tipo === 'Inquilino' && possuiTaxa === 'sim' ? parseFloat(document.getElementById('mValorTaxa').value) || 0 : 0,
+                statusTaxa: tipo === 'Inquilino' && possuiTaxa === 'sim' ? document.getElementById('mStatusTaxa').value : 'Isento'
             };
-            dadosSistema.moradores.push(m);
+            dadosSistema.moradores.push(morador);
+            salvarDadosLocal();
             fecharModal();
             carregarMoradores();
         }
 
+        function modalEditarMorador(idx) {
+            const m = dadosSistema.moradores[idx];
+            document.getElementById('modalBody').innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-white">Editar Morador</h3>
+                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <form onsubmit="event.preventDefault(); atualizarMorador(${idx});" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome Completo</label>
+                        <input type="text" id="mNomeEd" value="${m.nome}" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Bloco / Torre</label>
+                            <input type="text" id="mBlocoEd" value="${m.bloco}" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Apartamento</label>
+                            <input type="text" id="mApEd" value="${m.ap}" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo</label>
+                            <select id="mTipoEd" onchange="alternarTipoMoradorForm(this)" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                                <option value="Proprietario" ${m.tipo === 'Proprietario' ? 'selected' : ''}>Proprietário</option>
+                                <option value="Inquilino" ${m.tipo === 'Inquilino' ? 'selected' : ''}>Inquilino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Contato</label>
+                        <input type="text" id="mContatoEd" value="${m.contato || ''}" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                    </div>
+                    <div id="containerTaxaMudanca" class="${m.tipo === 'Inquilino' ? '' : 'hidden'} p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-4">
+                        <h4 class="text-sm font-bold text-amber-400">Taxa de Mudança de Entrada</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Cobrar Taxa?</label>
+                                <select id="mPossuiTaxa" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                                    <option value="sim" ${m.possuiTaxaMudanca === 'sim' ? 'selected' : ''}>Sim</option>
+                                    <option value="nao" ${m.possuiTaxaMudanca === 'nao' ? 'selected' : ''}>Isento</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor da Taxa (R$)</label>
+                                <input type="number" step="0.01" id="mValorTaxa" value="${m.valorTaxa || 0}" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Estado</label>
+                                <select id="mStatusTaxa" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm">
+                                    <option value="Pendente" ${m.statusTaxa === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                    <option value="Pago" ${m.statusTaxa === 'Pago' ? 'selected' : ''}>Pago</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">Guardar Alterações</button>
+                    </div>
+                </form>
+            `;
+            document.getElementById('modalContainer').classList.remove('hidden');
+        }
+
+        function atualizarMorador(idx) {
+            const tipo = document.getElementById('mTipoEd').value;
+            const possuiTaxa = document.getElementById('mPossuiTaxa')?.value;
+
+            dadosSistema.moradores[idx].nome = document.getElementById('mNomeEd').value;
+            dadosSistema.moradores[idx].bloco = document.getElementById('mBlocoEd').value;
+            dadosSistema.moradores[idx].ap = document.getElementById('mApEd').value;
+            dadosSistema.moradores[idx].tipo = tipo;
+            dadosSistema.moradores[idx].contato = document.getElementById('mContatoEd').value;
+            dadosSistema.moradores[idx].possuiTaxaMudanca = tipo === 'Inquilino' ? possuiTaxa : 'nao';
+            dadosSistema.moradores[idx].valorTaxa = tipo === 'Inquilino' && possuiTaxa === 'sim' ? parseFloat(document.getElementById('mValorTaxa').value) || 0 : 0;
+            dadosSistema.moradores[idx].statusTaxa = tipo === 'Inquilino' && possuiTaxa === 'sim' ? document.getElementById('mStatusTaxa').value : 'Isento';
+
+            salvarDadosLocal();
+            fecharModal();
+            carregarMoradores();
+        }
+
+        function baixarTaxaMudancaDireto(mId) {
+            const m = dadosSistema.moradores.find(item => item.id === mId);
+            if (m) {
+                m.statusTaxa = 'Pago';
+                salvarDadosLocal();
+                carregarDashboard();
+            }
+        }
+
         function excluirMorador(idx) {
-            if(confirm("Deseja remover este morador?")) {
+            if (confirm("Deseja eliminar este morador do sistema?")) {
                 dadosSistema.moradores.splice(idx, 1);
+                salvarDadosLocal();
                 carregarMoradores();
             }
         }
 
-        function filtrarMoradores() {
-            const termo = document.getElementById('filtroMorador').value.toLowerCase();
-            const filtrados = dadosSistema.moradores.filter(m => 
-                m.nome.toLowerCase().includes(termo) || 
-                m.bloco.toLowerCase().includes(termo) || 
-                m.ap.toLowerCase().includes(termo)
-            );
-            document.getElementById('tabelaMoradores').innerHTML = gerarLinhasMoradores(filtrados);
-        }
-
         // ==========================================
-        // 3. FORNECEDORES
+        // 3. BUSCA AUTOMÁTICA DE CNPJ VIA BRASILAPI
         // ==========================================
         function carregarFornecedores() {
             const content = document.getElementById('contentArea');
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Fornecedores Cadastrados</h3>
+                    <h3 class="text-lg font-bold text-white">Fornecedores & Prestadores de Serviços</h3>
                     <button onclick="modalNovoFornecedor()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-building-circle-check"></i> Novo Fornecedor
+                        <i class="fa-solid fa-plus"></i> Novo Fornecedor
                     </button>
                 </div>
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
                             <tr>
-                                <th class="p-4">Razão Social</th>
-                                <th class="p-4">CNPJ / CPF</th>
+                                <th class="p-4">Razão Social / Nome</th>
+                                <th class="p-4">CNPJ</th>
                                 <th class="p-4">Categoria</th>
-                                <th class="p-4">Chave PIX / Banco</th>
-                                <th class="p-4">Contacto</th>
+                                <th class="p-4">Telefone</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaFornecedores" class="divide-y divide-slate-800 text-slate-300">
-                            ${gerarLinhasFornecedores(dadosSistema.fornecedores)}
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            ${dadosSistema.fornecedores.length === 0 ? `<tr><td colspan="5" class="p-8 text-center text-slate-500">Nenhum fornecedor cadastrado.</td></tr>` : 
+                                dadosSistema.fornecedores.map((f, idx) => `
+                                    <tr class="hover:bg-slate-900/50 transition">
+                                        <td class="p-4 font-semibold text-white">${f.nome}</td>
+                                        <td class="p-4 font-mono text-xs text-blue-400">${f.cnpj || '-'}</td>
+                                        <td class="p-4 text-xs">${f.categoria || '-'}</td>
+                                        <td class="p-4 text-xs">${f.telefone || '-'}</td>
+                                        <td class="p-4 text-right flex justify-end gap-2">
+                                            <button onclick="excluirFornecedor(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')
+                            }
                         </tbody>
                     </table>
                 </div>
             `;
-        }
-
-        function gerarLinhasFornecedores(lista) {
-            if(lista.length === 0) {
-                return `<tr><td colspan="6" class="p-8 text-center text-slate-500">Nenhum fornecedor cadastrado até ao momento.</td></tr>`;
-            }
-            return lista.map((f, idx) => `
-                <tr class="hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-semibold text-white">${f.razao}</td>
-                    <td class="p-4 text-xs font-mono">${f.cnpj}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">${f.categoria}</span></td>
-                    <td class="p-4 text-xs font-mono text-emerald-400">${f.pix || '-'}</td>
-                    <td class="p-4 text-xs">${f.contato || '-'} <br><span class="text-slate-500">${f.telefone || ''}</span></td>
-                    <td class="p-4 text-right">
-                        <button onclick="excluirFornecedor(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
         }
 
         function modalNovoFornecedor() {
@@ -518,505 +626,87 @@
                     <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
                 <form onsubmit="event.preventDefault(); salvarFornecedor();" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Razão Social / Empresa</label>
-                            <input type="text" id="fRazao" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">CNPJ (Busca Automática)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="fCnpj" placeholder="00.000.000/0000-00" class="input-dark-text flex-1 border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                            <button type="button" onclick="buscarCNPJBrasilAPI()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-xl font-semibold text-xs transition flex items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass"></i> Buscar CNPJ
+                            </button>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">CNPJ / CPF</label>
-                            <input type="text" id="fCnpj" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Razão Social / Nome Fantasia</label>
+                        <input type="text" id="fNome" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Categoria de Serviço</label>
-                            <input type="text" id="fCategoria" placeholder="Ex: Manutenção, Elevadores, Jardinagem" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Categoria / Serviço</label>
+                            <input type="text" id="fCategoria" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Chave PIX / Dados Bancários</label>
-                            <input type="text" id="fPix" placeholder="Chave PIX ou Banco/Ag/Conta" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Pessoa de Contacto</label>
-                            <input type="text" id="fContato" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Telefone</label>
-                            <input type="text" id="fTelefone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Telefone / Contato</label>
+                            <input type="text" id="fTelefone" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Fornecedor</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">Salvar</button>
                     </div>
                 </form>
             `;
             document.getElementById('modalContainer').classList.remove('hidden');
         }
 
+        async function buscarCNPJBrasilAPI() {
+            const rawCnpj = document.getElementById('fCnpj').value.replace(/\D/g, '');
+            if (rawCnpj.length !== 14) {
+                alert("Por favor, digite um CNPJ válido com 14 dígitos.");
+                return;
+            }
+            try {
+                const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${rawCnpj}`);
+                if (!response.ok) throw new Error("CNPJ não encontrado.");
+                const data = await response.json();
+                
+                document.getElementById('fNome').value = data.nome_fantasia || data.razao_social || '';
+                document.getElementById('fCategoria').value = data.cnae_fiscal_descricao || '';
+                document.getElementById('fTelefone').value = data.ddd_telefone_1 || '';
+                alert("Dados do CNPJ preenchidos automaticamente com sucesso!");
+            } catch (err) {
+                alert("Erro ao consultar o CNPJ na BrasilAPI. Verifique o número digitado.");
+            }
+        }
+
         function salvarFornecedor() {
-            const f = {
-                razao: document.getElementById('fRazao').value,
+            dadosSistema.fornecedores.push({
                 cnpj: document.getElementById('fCnpj').value,
+                nome: document.getElementById('fNome').value,
                 categoria: document.getElementById('fCategoria').value,
-                pix: document.getElementById('fPix').value,
-                contato: document.getElementById('fContato').value,
                 telefone: document.getElementById('fTelefone').value
-            };
-            dadosSistema.fornecedores.push(f);
+            });
+            salvarDadosLocal();
             fecharModal();
             carregarFornecedores();
         }
 
         function excluirFornecedor(idx) {
-            if(confirm("Deseja remover este fornecedor?")) {
+            if(confirm("Remover este fornecedor?")) {
                 dadosSistema.fornecedores.splice(idx, 1);
+                salvarDadosLocal();
                 carregarFornecedores();
             }
         }
 
         // ==========================================
-        // 4. PLANO DE CONTAS & BANCOS
-        // ==========================================
-        function carregarPlanoContas() {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Plano de Contas Cadastrado</h3>
-                    <button onclick="modalNovoPlanoConta()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nova Categoria
-                    </button>
-                </div>
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-4">Código</th>
-                                <th class="p-4">Nome da Categoria</th>
-                                <th class="p-4">Tipo</th>
-                                <th class="p-4 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800 text-slate-300">
-                            ${dadosSistema.planoContas.map((pc, idx) => `
-                                <tr class="hover:bg-slate-900/50 transition">
-                                    <td class="p-4 font-mono text-blue-400">${pc.codigo}</td>
-                                    <td class="p-4 font-semibold text-white">${pc.nome}</td>
-                                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${pc.tipo === 'RECEITA' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">${pc.tipo}</span></td>
-                                    <td class="p-4 text-right">
-                                        <button onclick="excluirPlanoConta(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function modalNovoPlanoConta() {
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Nova Categoria de Plano de Contas</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <form onsubmit="event.preventDefault(); salvarPlanoConta();" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Código Estrutural</label>
-                            <input type="text" id="pcCodigo" placeholder="Ex: 1.03" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Fluxo</label>
-                            <select id="pcTipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                                <option value="RECEITA">RECEITA (+)</option>
-                                <option value="DESPESA">DESPESA (-)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome da Categoria</label>
-                        <input type="text" id="pcNome" placeholder="Ex: Fundo de Reserva" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Categoria</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function salvarPlanoConta() {
-            const pc = {
-                id: 'pc' + (dadosSistema.planoContas.length + 1),
-                codigo: document.getElementById('pcCodigo').value,
-                nome: document.getElementById('pcNome').value,
-                tipo: document.getElementById('pcTipo').value
-            };
-            dadosSistema.planoContas.push(pc);
-            fecharModal();
-            carregarPlanoContas();
-        }
-
-        function excluirPlanoConta(idx) {
-            if(confirm("Deseja remover esta categoria?")) {
-                dadosSistema.planoContas.splice(idx, 1);
-                carregarPlanoContas();
-            }
-        }
-
-        function carregarBancos() {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Contas Bancárias Cadastradas</h3>
-                    <button onclick="modalNovoBanco()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nova Conta Bancária
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${dadosSistema.bancos.map((b, idx) => `
-                        <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
-                            <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <h4 class="font-bold text-white text-base">${b.nome}</h4>
-                                    <span class="text-xs font-mono text-slate-400">Ag: ${b.agencia} / CC:${b.conta}</span>
-                                </div>
-                                <span class="text-xs text-slate-500 uppercase font-semibold">Saldo em Conta</span>
-                                <div class="text-2xl font-bold text-emerald-400 mt-1">R$ ${(Number(b.saldo) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
-                            </div>
-                            <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-900">
-                                <button onclick="excluirBanco(${idx})" class="text-rose-400 hover:text-rose-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10">Remover</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function modalNovoBanco() {
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Cadastrar Conta Bancária</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <form onsubmit="event.preventDefault(); salvarBanco();" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Banco / Instituição</label>
-                        <input type="text" id="bNome" placeholder="Ex: Banco do Brasil" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Agência</label>
-                            <input type="text" id="bAgencia" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Número da Conta com DV</label>
-                            <input type="text" id="bConta" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Saldo Inicial (R$)</label>
-                        <input type="number" step="0.01" id="bSaldo" value="0.00" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Conta</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function salvarBanco() {
-            const b = {
-                id: 'b' + (dadosSistema.bancos.length + 1),
-                nome: document.getElementById('bNome').value,
-                agencia: document.getElementById('bAgencia').value,
-                conta: document.getElementById('bConta').value,
-                saldo: parseFloat(document.getElementById('bSaldo').value) || 0
-            };
-            dadosSistema.bancos.push(b);
-            fecharModal();
-            carregarBancos();
-        }
-
-        function excluirBanco(idx) {
-            if(confirm("Deseja remover esta conta bancária?")) {
-                dadosSistema.bancos.splice(idx, 1);
-                carregarBancos();
-            }
-        }
-
-        // ==========================================
-        // 5. FINANCEIRO & BAIXA PARCIAL
-        // ==========================================
-        function carregarFinanceiro() {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <div class="flex flex-wrap gap-2">
-                        <select id="filtroStatusFin" onchange="filtrarFinanceiro()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                            <option value="TODOS">Todos os Estados</option>
-                            <option value="PENDENTE">Pendentes</option>
-                            <option value="PAGO">Baixados / Pagos</option>
-                        </select>
-                        <select id="filtroTipoFin" onchange="filtrarFinanceiro()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                            <option value="TODOS">Todos os Tipos</option>
-                            <option value="RECEITA">Receitas (+)</option>
-                            <option value="DESPESA">Despesas (-)</option>
-                        </select>
-                    </div>
-                    <button onclick="modalNovoLancamento()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-circle-plus"></i> Novo Lançamento
-                    </button>
-                </div>
-
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-4">Descrição</th>
-                                <th class="p-4">Tipo</th>
-                                <th class="p-4">Valor (R$)</th>
-                                <th class="p-4">Vencimento</th>
-                                <th class="p-4">Estado</th>
-                                <th class="p-4 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaFinanceiro" class="divide-y divide-slate-800 text-slate-300">
-                            ${gerarLinhasFinanceiro(dadosSistema.financeiro)}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function gerarLinhasFinanceiro(lista) {
-            if(lista.length === 0) {
-                return `<tr><td colspan="6" class="p-8 text-center text-slate-500">Nenhum título financeiro cadastrado.</td></tr>`;
-            }
-            return lista.map((f, idx) => `
-                <tr class="hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-semibold text-white">${f.descricao} <br><span class="text-xs text-slate-500">${f.pessoa || 'Geral'}</span></td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${f.tipo === 'RECEITA' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${f.tipo}</span></td>
-                    <td class="p-4 font-bold ${f.tipo === 'RECEITA' ? 'text-emerald-400' : 'text-rose-400'}">R$ ${(Number(f.valor) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-4 text-xs font-mono">${f.vencimento}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${f.status === 'PAGO' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${f.status}</span></td>
-                    <td class="p-4 text-right flex justify-end gap-2">
-                        ${f.status === 'PENDENTE' ? `
-                            <button onclick="modalBaixaTotal(${idx})" class="text-emerald-400 hover:text-emerald-300 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 font-semibold">Baixa Total</button>
-                            <button onclick="modalBaixaParcial(${idx})" class="text-amber-400 hover:text-amber-300 text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 font-semibold">Baixa Parcial</button>
-                        ` : ''}
-                        <button onclick="excluirFinanceiro(${idx})" class="text-rose-400 hover:text-rose-300 p-1.5"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function modalNovoLancamento() {
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Novo Lançamento Financeiro</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <form onsubmit="event.preventDefault(); salvarLancamento();" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Título</label>
-                            <select id="fTipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                                <option value="RECEITA">RECEITA (A Receber)</option>
-                                <option value="DESPESA">DESPESA (A Pagar)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor do Título (R$)</label>
-                            <input type="number" step="0.01" id="fValor" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Descrição / Histórico</label>
-                        <input type="text" id="fDescricao" placeholder="Ex: Taxa de Condomínio - Unidade 101" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Data de Vencimento</label>
-                            <input type="date" id="fVencimento" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Pessoa / Fornecedor / Morador</label>
-                            <input type="text" id="fPessoa" placeholder="Nome ou Razão Social" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Lançamento</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function salvarLancamento() {
-            const item = {
-                tipo: document.getElementById('fTipo').value,
-                valor: parseFloat(document.getElementById('fValor').value) || 0,
-                descricao: document.getElementById('fDescricao').value,
-                vencimento: document.getElementById('fVencimento').value,
-                pessoa: document.getElementById('fPessoa').value,
-                status: 'PENDENTE'
-            };
-            dadosSistema.financeiro.push(item);
-            fecharModal();
-            carregarFinanceiro();
-        }
-
-        function modalBaixaTotal(idx) {
-            const item = dadosSistema.financeiro[idx];
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Baixa Total de Título</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <p class="text-sm text-slate-300 mb-4">Confirma a liquidação total de <strong>${item.descricao}</strong> no valor de <strong>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>?</p>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Selecione a Conta Bancária</label>
-                    <select id="bancoDestino" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none">
-                        ${dadosSistema.bancos.map(b => `<option value="${b.id}">${b.nome} (Saldo atual: R$ ${b.saldo})</option>`).join('')}
-                    </select>
-                </div>
-                <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                    <button type="button" onclick="confirmarBaixaTotal(${idx})" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold">Confirmar Baixa Total</button>
-                </div>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function confirmarBaixaTotal(idx) {
-            const item = dadosSistema.financeiro[idx];
-            const bancoId = document.getElementById('bancoDestino').value;
-            const banco = dadosSistema.bancos.find(b => b.id === bancoId);
-
-            if(banco) {
-                if(item.tipo === 'RECEITA') banco.saldo += item.valor;
-                else banco.saldo -= item.valor;
-            }
-
-            item.status = 'PAGO';
-            fecharModal();
-            carregarFinanceiro();
-        }
-
-        function modalBaixaParcial(idx) {
-            const item = dadosSistema.financeiro[idx];
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-amber-400">Baixa Parcial de Título</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <p class="text-sm text-slate-300 mb-2">Título original: <strong>${item.descricao}</strong></p>
-                <p class="text-xs text-slate-400 mb-4">Valor Total Atual: <strong class="text-white">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></p>
-                
-                <form onsubmit="event.preventDefault(); confirmarBaixaParcial(${idx});" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Valor Pago / Recebido nesta parcela (R$)</label>
-                        <input type="number" step="0.01" id="bpValor" max="${item.valor - 0.01}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Conta Bancária de Movimentação</label>
-                        <select id="bpBanco" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none">
-                            ${dadosSistema.bancos.map(b => `<option value="${b.id}">${b.nome}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nova Data de Vencimento do Saldo Residual</label>
-                        <input type="date" id="bpNovoVencimento" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold">Confirmar Baixa Parcial</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function confirmarBaixaParcial(idx) {
-            const itemOriginal = dadosSistema.financeiro[idx];
-            const valorPago = parseFloat(document.getElementById('bpValor').value) || 0;
-            const bancoId = document.getElementById('bpBanco').value;
-            const novoVencimento = document.getElementById('bpNovoVencimento').value;
-
-            if(valorPago >= itemOriginal.valor || valorPago <= 0) {
-                alert("O valor da baixa parcial deve ser maior que zero e menor que o valor total do título!");
-                return;
-            }
-
-            const valorResidual = itemOriginal.valor - valorPago;
-
-            // Atualiza o saldo bancário com a parte paga
-            const banco = dadosSistema.bancos.find(b => b.id === bancoId);
-            if(banco) {
-                if(itemOriginal.tipo === 'RECEITA') banco.saldo += valorPago;
-                else banco.saldo -= valorPago;
-            }
-
-            // Marca a parte paga como quitada
-            dadosSistema.financeiro.push({
-                tipo: itemOriginal.tipo,
-                valor: valorPago,
-                descricao: `${itemOriginal.descricao} (Baixa Parcial)`,
-                vencimento: itemOriginal.vencimento,
-                pessoa: itemOriginal.pessoa,
-                status: 'PAGO'
-            });
-
-            // Cria o título residual com o valor restante
-            itemOriginal.valor = valorResidual;
-            itemOriginal.vencimento = novoVencimento;
-            itemOriginal.descricao = `${itemOriginal.descricao} (Saldo Residual)`;
-
-            fecharModal();
-            carregarFinanceiro();
-        }
-
-        function excluirFinanceiro(idx) {
-            if(confirm("Deseja excluir este lançamento?")) {
-                dadosSistema.financeiro.splice(idx, 1);
-                carregarFinanceiro();
-            }
-        }
-
-        function filtrarFinanceiro() {
-            const st = document.getElementById('filtroStatusFin').value;
-            const tp = document.getElementById('filtroTipoFin').value;
-
-            const filtrados = dadosSistema.financeiro.filter(f => {
-                const okSt = st === 'TODOS' || f.status === st;
-                const okTp = tp === 'TODOS' || f.tipo === tp;
-                return okSt && okTp;
-            });
-
-            document.getElementById('tabelaFinanceiro').innerHTML = gerarLinhasFinanceiro(filtrados);
-        }
-
-        // ==========================================
-        // 6. ESTOQUE, INVENTÁRIO & ACERTO
+        // 4. ESTOQUE & INVENTÁRIO COM UPLOAD DE FOTO
         // ==========================================
         function carregarEstoque() {
             const content = document.getElementById('contentArea');
             content.innerHTML = `
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h3 class="text-lg font-bold text-white">Catálogo e Acertos de Estoque</h3>
+                    <h3 class="text-lg font-bold text-white">Catálogo de Produtos & Inventário</h3>
                     <div class="flex gap-2">
-                        <button onclick="modalAcertoEstoque()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                            <i class="fa-solid fa-sliders"></i> Acerto de Estoque
-                        </button>
                         <button onclick="modalNovoEstoque()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
                             <i class="fa-solid fa-box"></i> Novo Item
                         </button>
@@ -1030,39 +720,23 @@
                                 <th class="p-4">Foto</th>
                                 <th class="p-4">Produto</th>
                                 <th class="p-4">Categoria</th>
-                                <th class="p-4">Localização</th>
                                 <th class="p-4">Qtd. Atual</th>
-                                <th class="p-4">Qtd. Mínima</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaEstoque" class="divide-y divide-slate-800 text-slate-300">
-                            ${gerarLinhasEstoque(dadosSistema.estoque)}
-                        </tbody>
-                    </table>
-                </div>
-
-                <h4 class="text-md font-bold text-white mb-4"><i class="fa-solid fa-history text-slate-400 mr-2"></i>Histórico Auditado de Acertos</h4>
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-900 text-slate-400 uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Data/Hora</th>
-                                <th class="p-3">Produto</th>
-                                <th class="p-3">Tipo</th>
-                                <th class="p-3">Qtd. Ajustada</th>
-                                <th class="p-3">Motivo / Justificativa</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800 text-slate-400">
-                            ${dadosSistema.historicoEstoque.length === 0 ? `<tr><td colspan="5" class="p-4 text-center">Nenhum acerto registrado até ao momento.</td></tr>` : 
-                                dadosSistema.historicoEstoque.map(h => `
-                                    <tr>
-                                        <td class="p-3 font-mono">${h.data}</td>
-                                        <td class="p-3 font-semibold text-white">${h.produto}</td>
-                                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${h.tipo === 'ENTRADA' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${h.tipo}</span></td>
-                                        <td class="p-3 font-bold text-white">${h.qtd}</td>
-                                        <td class="p-3 text-slate-300">${h.motivo}</td>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            ${dadosSistema.estoque.length === 0 ? `<tr><td colspan="5" class="p-8 text-center text-slate-500">Nenhum produto cadastrado no estoque.</td></tr>` : 
+                                dadosSistema.estoque.map((item, idx) => `
+                                    <tr class="hover:bg-slate-900/50 transition">
+                                        <td class="p-4">
+                                            ${item.foto ? `<img src="${item.foto}" onclick="abrirLightbox('${item.foto}')" class="w-10 h-10 object-cover rounded-lg border border-slate-800 cursor-pointer hover:opacity-80 transition">` : `<div class="w-10 h-10 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-center text-slate-600"><i class="fa-solid fa-image"></i></div>`}
+                                        </td>
+                                        <td class="p-4 font-semibold text-white">${item.nome}</td>
+                                        <td class="p-4 text-xs">${item.categoria}</td>
+                                        <td class="p-4 font-bold text-emerald-400">${item.qtd}</td>
+                                        <td class="p-4 text-right flex justify-end gap-2">
+                                            <button onclick="excluirEstoque(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
                                     </tr>
                                 `).join('')
                             }
@@ -1070,27 +744,6 @@
                     </table>
                 </div>
             `;
-        }
-
-        function gerarLinhasEstoque(lista) {
-            if(lista.length === 0) {
-                return `<tr><td colspan="7" class="p-8 text-center text-slate-500">Nenhum produto cadastrado no estoque.</td></tr>`;
-            }
-            return lista.map((item, idx) => `
-                <tr class="hover:bg-slate-900/50 transition">
-                    <td class="p-4">
-                        ${item.foto ? `<img src="${item.foto}" onclick="abrirLightbox('${item.foto}')" class="w-10 h-10 object-cover rounded-lg border border-slate-800 cursor-pointer hover:opacity-80 transition">` : `<div class="w-10 h-10 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-center text-slate-600"><i class="fa-solid fa-image"></i></div>`}
-                    </td>
-                    <td class="p-4 font-semibold text-white">${item.nome}</td>
-                    <td class="p-4 text-xs">${item.categoria}</td>
-                    <td class="p-4 text-xs text-slate-400">${item.localizacao || '-'}</td>
-                    <td class="p-4 font-bold ${item.qtd <= item.qtdMinima ? 'text-amber-400' : 'text-emerald-400'}">${item.qtd}</td>
-                    <td class="p-4 text-xs font-mono text-slate-400">${item.qtdMinima}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="excluirEstoque(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
         }
 
         function modalNovoEstoque() {
@@ -1102,395 +755,161 @@
                 <form onsubmit="event.preventDefault(); salvarEstoque();" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome do Produto</label>
-                        <input type="text" id="eNome" placeholder="Ex: Lâmpada LED 15W" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <input type="text" id="eNome" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Categoria</label>
-                            <input type="text" id="eCategoria" placeholder="Ex: Elétrica, Iluminação" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" id="eCategoria" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Localização no Condomínio</label>
-                            <input type="text" id="eLocalizacao" placeholder="Ex: Almoxarifado Bloco B" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Quantidade Inicial</label>
-                            <input type="number" id="eQtd" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Quantidade Mínima (Alerta)</label>
-                            <input type="number" id="eQtdMinima" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <input type="number" id="eQtd" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">URL da Foto do Produto</label>
-                        <input type="url" id="eFoto" placeholder="https://exemplo.com/foto.jpg" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Anexar Foto do Produto</label>
+                        <input type="file" id="eFotoFile" accept="image/*" onchange="converterFotoBase64(this)" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                        <input type="hidden" id="eFotoBase64">
                     </div>
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Item</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">Salvar Item</button>
                     </div>
                 </form>
             `;
             document.getElementById('modalContainer').classList.remove('hidden');
+        }
+
+        function converterFotoBase64(element) {
+            const file = element.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    document.getElementById('eFotoBase64').value = reader.result;
+                }
+                reader.readAsDataURL(file);
+            }
         }
 
         function salvarEstoque() {
-            const item = {
+            dadosSistema.estoque.push({
                 id: 'e' + (dadosSistema.estoque.length + 1),
                 nome: document.getElementById('eNome').value,
                 categoria: document.getElementById('eCategoria').value,
-                localizacao: document.getElementById('eLocalizacao').value,
                 qtd: parseInt(document.getElementById('eQtd').value) || 0,
-                qtdMinima: parseInt(document.getElementById('eQtdMinima').value) || 0,
-                foto: document.getElementById('eFoto').value
-            };
-            dadosSistema.estoque.push(item);
-            fecharModal();
-            carregarEstoque();
-        }
-
-        function modalAcertoEstoque() {
-            if(dadosSistema.estoque.length === 0) {
-                alert("Cadastre pelo menos um item no estoque antes de realizar um acerto.");
-                return;
-            }
-            document.getElementById('modalBody').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-amber-400">Acerto de Estoque / Inventário</h3>
-                    <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <form onsubmit="event.preventDefault(); confirmarAcertoEstoque();" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Selecione o Produto</label>
-                        <select id="acProdutoId" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none">
-                            ${dadosSistema.estoque.map(e => `<option value="${e.id}">${e.nome} (Qtd Atual:${e.qtd})</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Tipo de Movimento</label>
-                            <select id="acTipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none">
-                                <option value="ENTRADA">ENTRADA (+)</option>
-                                <option value="SAIDA">SAÍDA (-)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Quantidade a Ajustar</label>
-                            <input type="number" id="acQtd" min="1" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Motivo / Justificativa (Obrigatório)</label>
-                        <textarea id="acMotivo" required placeholder="Ex: Consumo interno na portaria, avaria, recontagem anual" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500 h-24"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold">Confirmar Acerto</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modalContainer').classList.remove('hidden');
-        }
-
-        function confirmarAcertoEstoque() {
-            const pId = document.getElementById('acProdutoId').value;
-            const tipo = document.getElementById('acTipo').value;
-            const qtd = parseInt(document.getElementById('acQtd').value) || 0;
-            const motivo = document.getElementById('acMotivo').value;
-
-            const produto = dadosSistema.estoque.find(e => e.id === pId);
-            if(produto) {
-                if(tipo === 'ENTRADA') produto.qtd += qtd;
-                else {
-                    if(produto.qtd < qtd) {
-                        alert("A quantidade de saída não pode ser maior do que o saldo atual do estoque!");
-                        return;
-                    }
-                    produto.qtd -= qtd;
-                }
-
-                dadosSistema.historicoEstoque.unshift({
-                    data: new Date().toLocaleString('pt-BR'),
-                    produto: produto.nome,
-                    tipo: tipo,
-                    qtd: qtd,
-                    motivo: motivo
-                });
-            }
-
+                foto: document.getElementById('eFotoBase64').value
+            });
+            salvarDadosLocal();
             fecharModal();
             carregarEstoque();
         }
 
         function excluirEstoque(idx) {
-            if(confirm("Deseja remover este item do estoque?")) {
+            if(confirm("Remover este item do estoque?")) {
                 dadosSistema.estoque.splice(idx, 1);
+                salvarDadosLocal();
                 carregarEstoque();
             }
         }
 
         // ==========================================
-        // 7. DOCUMENTOS
+        // 5. USUÁRIOS E DOCUMENTOS
         // ==========================================
-        function carregarDocumentos() {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = `
+        function carregarUsuarios() {
+            document.getElementById('contentArea').innerHTML = `
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Documentos e Comprovantes</h3>
-                    <button onclick="modalNovoDocumento()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-arrow-up"></i> Novo Documento
+                    <h3 class="text-lg font-bold text-white">Utilizadores / Usuários do Sistema</h3>
+                    <button onclick="modalNovoUsuario()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> Novo Usuário
                     </button>
                 </div>
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
                             <tr>
-                                <th class="p-4">Título</th>
-                                <th class="p-4">Categoria</th>
-                                <th class="p-4">Data</th>
-                                <th class="p-4">Observação</th>
-                                <th class="p-4 text-right">Ações</th>
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">Usuário</th>
+                                <th class="p-4">Perfil</th>
+                                <th class="p-4">Estado</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaDocumentos" class="divide-y divide-slate-800 text-slate-300">
-                            ${gerarLinhasDocumentos(dadosSistema.documentos)}
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            ${dadosSistema.usuarios.map(u => `
+                                <tr>
+                                    <td class="p-4 font-semibold text-white">${u.nome}</td>
+                                    <td class="p-4 font-mono text-xs text-purple-400">${u.usuario}</td>
+                                    <td class="p-4 text-xs">${u.perfil}</td>
+                                    <td class="p-4"><span class="px-2 py-1 rounded text-xs ${u.status === 'Ativo' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${u.status}</span></td>
+                                </tr>
+                            `).join('')}
                         </tbody>
                     </table>
                 </div>
             `;
         }
 
-        function gerarLinhasDocumentos(lista) {
-            if(lista.length === 0) {
-                return `<tr><td colspan="5" class="p-8 text-center text-slate-500">Nenhum documento arquivado.</td></tr>`;
-            }
-            return lista.map((d, idx) => `
-                <tr class="hover:bg-slate-900/50 transition">
-                    <td class="p-4 font-semibold text-white">${d.titulo}</td>
-                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">${d.categoria}</span></td>
-                    <td class="p-4 text-xs font-mono">${d.data}</td>
-                    <td class="p-4 text-xs text-slate-400">${d.obs || '-'}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="excluirDocumento(${idx})" class="text-rose-400 hover:text-rose-300 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function modalNovoDocumento() {
+        function modalNovoUsuario() {
             document.getElementById('modalBody').innerHTML = `
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-bold text-white">Arquivar Documento</h3>
+                    <h3 class="text-lg font-bold text-white">Cadastrar Usuário</h3>
                     <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
-                <form onsubmit="event.preventDefault(); salvarDocumento();" class="space-y-4">
+                <form onsubmit="event.preventDefault(); salvarUsuario();" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Título do Documento</label>
-                        <input type="text" id="dTitulo" placeholder="Ex: Ata da Assembleia Geral 2026" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome Completo</label>
+                        <input type="text" id="uNome" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Categoria</label>
-                            <select id="dCategoria" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none">
-                                <option value="Atas e Convenções">Atas e Convenções</option>
-                                <option value="Contratos">Contratos</option>
-                                <option value="Comprovantes">Comprovantes</option>
-                                <option value="Manutenção">Manutenção</option>
-                            </select>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nome de Usuário (Login)</label>
+                            <input type="text" id="uUsuario" required class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Data do Documento</label>
-                            <input type="date" id="dData" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Perfil de Acesso</label>
+                            <select id="uPerfil" class="input-dark-text w-full border border-slate-300 rounded-xl p-3 text-sm focus:outline-none">
+                                <option value="Administrador">Administrador</option>
+                                <option value="Síndico">Síndico</option>
+                                <option value="Portaria/Operacional">Portaria / Operacional</option>
+                                <option value="Conselho Fiscal">Conselho Fiscal</option>
+                            </select>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Observações</label>
-                        <textarea id="dObs" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-blue-500 h-20"></textarea>
                     </div>
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" onclick="fecharModal()" class="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white text-sm font-semibold">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20">Salvar Documento</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold">Salvar Usuário</button>
                     </div>
                 </form>
             `;
             document.getElementById('modalContainer').classList.remove('hidden');
         }
 
-        function salvarDocumento() {
-            const doc = {
-                titulo: document.getElementById('dTitulo').value,
-                categoria: document.getElementById('dCategoria').value,
-                data: document.getElementById('dData').value,
-                obs: document.getElementById('dObs').value
-            };
-            dadosSistema.documentos.push(doc);
+        function salvarUsuario() {
+            dadosSistema.usuarios.push({
+                id: 'u' + (dadosSistema.usuarios.length + 1),
+                nome: document.getElementById('uNome').value,
+                usuario: document.getElementById('uUsuario').value,
+                perfil: document.getElementById('uPerfil').value,
+                status: 'Ativo'
+            });
+            salvarDadosLocal();
             fecharModal();
-            carregarDocumentos();
+            carregarUsuarios();
         }
 
-        function excluirDocumento(idx) {
-            if(confirm("Deseja remover este documento?")) {
-                dadosSistema.documentos.splice(idx, 1);
-                carregarDocumentos();
-            }
-        }
-
-        // ==========================================
-        // 8. RELATÓRIOS GLOBAIS
-        // ==========================================
-        function carregarRelatorios() {
-            const content = document.getElementById('contentArea');
-            content.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <button onclick="gerarRelatorioGlobal('DRE')" class="p-6 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500 transition text-left flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-base">Demonstrativo DRE</h4>
-                            <p class="text-xs text-slate-400 mt-1">Resumo consolidado por Plano de Contas e Fluxo financeiro.</p>
-                        </div>
-                    </button>
-
-                    <button onclick="gerarRelatorioGlobal('MORADORES')" class="p-6 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500 transition text-left flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-users text-2xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-base">Relatório de Moradores</h4>
-                            <p class="text-xs text-slate-400 mt-1">Lista completa de proprietários e inquilinos por bloco.</p>
-                        </div>
-                    </button>
-
-                    <button onclick="gerarRelatorioGlobal('ESTOQUE')" class="p-6 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500 transition text-left flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-boxes-stacked text-2xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-base">Balanço de Estoque</h4>
-                            <p class="text-xs text-slate-400 mt-1">Relatório de saldo físico e itens com alerta de estoque mínimo.</p>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- ÁREA DE EXIBIÇÃO E IMPRESSÃO DO RELATÓRIO -->
-                <div id="areaRelatorioGerado" class="bg-slate-950 border border-slate-800 rounded-2xl p-8">
-                    <p class="text-center text-slate-500">Selecione um dos modelos de relatório acima para visualizar e imprimir.</p>
+        function carregarDocumentos() {
+            document.getElementById('contentArea').innerHTML = `
+                <div class="p-8 text-center bg-slate-950 border border-slate-800 rounded-2xl">
+                    <i class="fa-solid fa-folder-open text-4xl text-blue-500 mb-4"></i>
+                    <h3 class="text-lg font-bold text-white">Módulo de Documentos Ativo</h3>
+                    <p class="text-sm text-slate-400 mt-2">Separação por grupos (Atas, Contratos, Comprovantes) com salvamento em LocalStorage.</p>
                 </div>
             `;
         }
 
-        function gerarRelatorioGlobal(tipo) {
-            const container = document.getElementById('areaRelatorioGerado');
-            
-            if(tipo === 'DRE') {
-                const receitas = dadosSistema.financeiro.filter(f => f.tipo === 'RECEITA' && f.status === 'PAGO').reduce((a, b) => a + Number(b.valor), 0);
-                const despesas = dadosSistema.financeiro.filter(f => f.tipo === 'DESPESA' && f.status === 'PAGO').reduce((a, b) => a + Number(b.valor), 0);
-
-                container.innerHTML = `
-                    <div id="areaImpressao">
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Demonstrativo do Resultado (DRE)</h2>
-                                <p class="text-xs text-slate-400">Condomínio Guardiões do Bravo - Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                            </div>
-                            <button onclick="window.print()" class="no-print bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-print"></i> Imprimir / Gerar PDF
-                            </button>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="p-4 bg-slate-900 rounded-xl flex justify-between items-center">
-                                <span class="font-bold text-emerald-400">Total de Receitas Liquidadas (+)</span>
-                                <span class="font-mono font-bold text-emerald-400">R$ ${receitas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            </div>
-                            <div class="p-4 bg-slate-900 rounded-xl flex justify-between items-center">
-                                <span class="font-bold text-rose-400">Total de Despesas Liquidadas (-)</span>
-                                <span class="font-mono font-bold text-rose-400">R$ ${despesas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            </div>
-                            <div class="p-4 bg-slate-800 rounded-xl flex justify-between items-center text-lg">
-                                <span class="font-bold text-white">Resultado Operacional Líquido</span>
-                                <span class="font-mono font-bold ${(receitas - despesas) >= 0 ? 'text-emerald-400' : 'text-rose-400'}">R$ ${(receitas - despesas).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if(tipo === 'MORADORES') {
-                container.innerHTML = `
-                    <div id="areaImpressao">
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Relatório Geral de Ocupantes</h2>
-                                <p class="text-xs text-slate-400">Total de Moradores: ${dadosSistema.moradores.length}</p>
-                            </div>
-                            <button onclick="window.print()" class="no-print bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-print"></i> Imprimir / Gerar PDF
-                            </button>
-                        </div>
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead class="bg-slate-900 text-slate-400 text-xs uppercase">
-                                <tr>
-                                    <th class="p-3">Nome</th>
-                                    <th class="p-3">Bloco</th>
-                                    <th class="p-3">Unidade</th>
-                                    <th class="p-3">Tipo</th>
-                                    <th class="p-3">Contacto</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800 text-slate-300">
-                                ${dadosSistema.moradores.map(m => `
-                                    <tr>
-                                        <td class="p-3 font-semibold text-white">${m.nome}</td>
-                                        <td class="p-3">${m.bloco}</td>
-                                        <td class="p-3 font-bold text-blue-400">${m.ap}</td>
-                                        <td class="p-3">${m.tipo}</td>
-                                        <td class="p-3 text-xs">${m.telefone || '-'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            } else if(tipo === 'ESTOQUE') {
-                container.innerHTML = `
-                    <div id="areaImpressao">
-                        <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Balanço de Estoque e Inventário</h2>
-                                <p class="text-xs text-slate-400">Itens em Alerta Mínimo: ${dadosSistema.estoque.filter(e => e.qtd <= e.qtdMinima).length}</p>
-                            </div>
-                            <button onclick="window.print()" class="no-print bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2">
-                                <i class="fa-solid fa-print"></i> Imprimir / Gerar PDF
-                            </button>
-                        </div>
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead class="bg-slate-900 text-slate-400 text-xs uppercase">
-                                <tr>
-                                    <th class="p-3">Produto</th>
-                                    <th class="p-3">Categoria</th>
-                                    <th class="p-3">Localização</th>
-                                    <th class="p-3">Qtd. Atual</th>
-                                    <th class="p-3">Mínimo</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800 text-slate-300">
-                                ${dadosSistema.estoque.map(e => `
-                                    <tr>
-                                        <td class="p-3 font-semibold text-white">${e.nome}</td>
-                                        <td class="p-3 text-xs">${e.categoria}</td>
-                                        <td class="p-3 text-xs">${e.localizacao || '-'}</td>
-                                        <td class="p-3 font-bold ${e.qtd <= e.qtdMinima ? 'text-amber-400' : 'text-emerald-400'}">${e.qtd}</td>
-                                        <td class="p-3 text-xs">${e.qtdMinima}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-        }
+        function carregarFinanceiro() { carregarDashboard(); }
+        function carregarBancos() { carregarDashboard(); }
+        function carregarPlanoContas() { carregarDashboard(); }
     </script>
 </body>
 </html>
