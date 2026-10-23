@@ -1,1371 +1,312 @@
 <!DOCTYPE html>
-<html lang="pt-PT" class="h-full bg-slate-900">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guardiões do Bravo - Sistema de Gestão Condominial</title>
+    <title>Guardiões do Bravo - Gestão Condominial Segura</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Framework for Icons -->
+    <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js for Reports & DRE Visualizations -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        navy: {
-                            800: '#0f172a',
-                            900: '#020617',
-                            950: '#010409'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- HTML5 Barcode/QR Code Reader CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-        /* Custom Scrollbar for Sleek UI */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+        html, body { height: 100%; margin: 0; padding: 0; }
+        input, select, textarea { color: #0f172a !important; font-weight: 600 !important; }
+        .tab-active { border-bottom: 3px solid #0d9488; background-color: #ffffff; color: #0f766e; font-weight: 700; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .sidebar-full { height: 100vh; position: sticky; top: 0; }
+        @media print {
+            aside, header, .no-print, button, .actions-col { display: none !important; }
+            body { background: white !important; color: black !important; }
+            main { padding: 0 !important; }
+            .print-break { page-break-before: always; }
         }
     </style>
 </head>
-<body class="h-full text-slate-100 font-sans antialiased bg-slate-950 flex flex-col min-h-screen">
+<body class="bg-slate-100 font-sans antialiased text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Brand & Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-shield-halved text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <span class="text-lg font-bold text-white tracking-wide block leading-tight">GUARDIÕES DO BRAVO</span>
-                        <span class="text-xs text-emerald-400 font-medium">Gestão Condominial Sênior</span>
-                    </div>
-                </div>
+    <div id="app" class="flex-1 flex flex-col min-h-screen"></div>
 
-                <!-- Right Quick Stats / Status -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <div id="stock-alert-pill" class="hidden items-center space-x-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-3 py-1.5 rounded-full cursor-pointer" onclick="app.navigate('estoque')">
-                        <i class="fa-solid fa-triangle-exclamation text-amber-400 animate-pulse"></i>
-                        <span id="stock-alert-count">0 itens com stock baixo</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs text-slate-400 block">Utilizador Ativo</span>
-                        <span id="active-user-name" class="text-sm font-semibold text-slate-200">Administrador Sênior</span>
-                    </div>
-                    <button onclick="app.resetDataConfirm()" title="Redefinir Dados de Teste" class="text-slate-400 hover:text-rose-400 text-sm transition-colors p-2 rounded-lg hover:bg-slate-800">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- App Navigation Tabs -->
-    <nav class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-16 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex space-x-1 overflow-x-auto py-2 no-scrollbar" id="main-nav-tabs">
-                <!-- Navigation tabs dynamically rendered by JS -->
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content Dynamic Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div id="app-view">
-            <!-- Dynamic Module Content Rendered Here -->
-        </div>
-    </main>
-
-    <!-- Global Modal Overlay -->
-    <div id="global-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl transform transition-all overflow-hidden my-8" id="modal-content-container">
-            <!-- Modal dynamic HTML -->
-        </div>
-    </div>
-
-    <!-- Global Toast Notifications Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
-
-    <!-- Application Core Architecture & JS Logic -->
     <script>
-        /**
-         * GUARDIÕES DO BRAVO - ARQUITETURA SENIOR
-         * Camada Repository + Data Processing + Component System
-         */
+        const STORAGE_KEY = 'guardioes_bravo_db';
+        let tempBase64 = '';
+        let html5QrCodeScannerInstance = null;
 
-        // ==========================================
-        // 1. DATA COMPRESSION UTILITIES
-        // ==========================================
-        const DataUtils = {
-            /**
-             * Comprime imagem carregada pelo utilizador antes da persistência Base64
-             */
-            compressImage: (file, maxWidth = 800, quality = 0.7) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.src = event.target.result;
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-
-                            if (width > maxWidth) {
-                                height = Math.round((height * maxWidth) / width);
-                                width = maxWidth;
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-                            resolve(compressedBase64);
-                        };
-                        img.onerror = (err) => reject(err);
-                    };
-                    reader.onerror = (err) => reject(err);
-                });
-            },
-            formatCurrency: (amount) => {
-                return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(amount || 0);
-            },
-            formatDate: (dateStr) => {
-                if (!dateStr) return '-';
-                const parts = dateStr.split('-');
-                if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                return dateStr;
-            },
-            generateId: () => 'id_' + Math.random().toString(36).substr(2, 9)
+        const DEFAULT_DATA = {
+            configuracoes: { whatsappNotificacao: '5541999999999' },
+            usuarios: [
+                { id: 'usr_admin', usuario: 'admin', nome: 'Administrador Principal', email: 'admin@guardioes.com', perfil: 'Admin', status: 'Ativo', primeiroAcesso: false, senhaHash: 'Admin@12345' }
+            ],
+            financeiro: [],
+            formas_monetarias: [],
+            contas_bancarias: [],
+            moradores: [],
+            categorias: [
+                { id: 'cat_4', nome: 'Elétrica', modulo: 'Estoque' },
+                { id: 'cat_5', nome: 'Piscina', modulo: 'Estoque' }
+            ],
+            estoque: [
+                { id: 'est_1', item: 'Lâmpada LED 12W', codigoBarras: '7891234567890', categoria: 'Elétrica', qtd: 4, minimo: 10, maximo: 50, localizacao: 'Almoxarifado Central', proximaContagem: '2026-10-25', fotoBase64: '' },
+                { id: 'est_2', item: 'Cloro Granulado 10kg', codigoBarras: '7899876543210', categoria: 'Piscina', qtd: 15, minimo: 5, maximo: 30, localizacao: 'DML Piscina', proximaContagem: '2026-11-01', fotoBase64: '' }
+            ],
+            documentos: [],
+            dre_config: [],
+            logs: []
         };
 
-        // ==========================================
-        // 2. DB REPOSITORY (DATA ACCESSS LAYER)
-        // ==========================================
-        const DBRepository = {
-            STORAGE_PREFIX: 'gdb_app_',
-            
-            // Definição de coleções e schemas de dados iniciais
-            getInitialSeed: () => ({
-                moradores: [
-                    { id: 'm1', nome: 'Carlos Silva', fracao: 'Apt 101 - Bloco A', telefone: '+351 912 345 678', email: 'carlos@exemplo.pt', tipo: 'Proprietário', dataEntrada: '2022-01-15' },
-                    { id: 'm2', nome: 'Ana Martins', fracao: 'Apt 202 - Bloco A', telefone: '+351 923 456 789', email: 'ana.m@exemplo.pt', tipo: 'Inquilino', dataEntrada: '2023-05-10' },
-                    { id: 'm3', nome: 'Roberto Ramos', fracao: 'Apt 304 - Bloco B', telefone: '+351 934 567 890', email: 'roberto@exemplo.pt', tipo: 'Proprietário', dataEntrada: '2021-09-01' }
-                ],
-                estoque: [
-                    { id: 'e1', codigo: 'EST-001', nome: 'Lâmpadas LED 12W', categoria: 'Eletricidade', quantidade: 8, quantMinima: 15, localizacao: 'Armazém Central', custoUnidade: 4.50 },
-                    { id: 'e2', codigo: 'EST-002', nome: 'Detergente Industrial 5L', categoria: 'Limpeza', quantidade: 24, quantMinima: 10, localizacao: 'Armazém Limpeza', custoUnidade: 12.00 },
-                    { id: 'e3', codigo: 'EST-003', nome: 'Chaves de Acesso / Tags', categoria: 'Segurança', quantidade: 4, quantMinima: 10, localizacao: 'Receção', custoUnidade: 2.50 }
-                ],
-                inventarios: [
-                    { id: 'inv1', titulo: 'Balanço Geral de Fim de Ano', dataAgendada: '2026-11-15', responsavel: 'Carlos Silva', estado: 'Agendado', observacoes: 'Contagem completa de todos os ativos de eletricidade e limpeza.' }
-                ],
-                financeiro: [
-                    { id: 'f1', tipo: 'RECEBER', descricao: 'Quota Condominial - Apt 101', valorTotal: 120.00, valorPago: 120.00, dataVencimento: '2026-10-05', dataPagamento: '2026-10-04', estado: 'PAGO', contaId: 'c1', categoriaId: 'cat1' },
-                    { id: 'f2', tipo: 'PAGAR', descricao: 'Manutenção de Elevadores - Mensal', valorTotal: 350.00, valorPago: 150.00, dataVencimento: '2026-10-25', dataPagamento: null, estado: 'PARCIAL', contaId: 'c1', categoriaId: 'cat2' },
-                    { id: 'f3', tipo: 'PAGAR', descricao: 'Fatura de Eletricidade Áreas Comuns', valorTotal: 210.50, valorPago: 0, dataVencimento: '2026-11-02', dataPagamento: null, estado: 'PENDENTE', contaId: 'c1', categoriaId: 'cat3' }
-                ],
-                contasBancarias: [
-                    { id: 'c1', banco: 'Banco Comercial (CGD)', iban: 'PT50 0035 0000 1234 5678 9012 3', saldoInicial: 4500.00, tipo: 'Ordem' },
-                    { id: 'c2', banco: 'Fundo de Reserva (Millennium BCP)', iban: 'PT50 0033 0000 9876 5432 1098 7', saldoInicial: 12800.00, tipo: 'Poupança/Reserva' }
-                ],
-                categorias: [
-                    { id: 'cat1', nome: 'Quotas de Condomínio', tipo: 'RECEITA' },
-                    { id: 'cat2', nome: 'Manutenção e Elevadores', tipo: 'DESPESA' },
-                    { id: 'cat3', nome: 'Serviços Públicos (Água/Luz)', tipo: 'DESPESA' },
-                    { id: 'cat4', nome: 'Limpeza e Higienização', tipo: 'DESPESA' }
-                ],
-                formasPagamento: [
-                    { id: 'fp1', nome: 'Transferência Bancária / MBWay' },
-                    { id: 'fp2', nome: 'Débito Direto (SEPA)' },
-                    { id: 'fp3', nome: 'Numerário / Espécie' }
-                ],
-                documentos: [
-                    { id: 'd1', titulo: 'Regulamento Interno 2026.pdf', categoria: 'Regulamentos', dataUpload: '2026-01-10', ficheiroUrl: '', tamanho: '1.2 MB' },
-                    { id: 'd2', titulo: 'Ata da Assembleia Geral Ordinária.pdf', categoria: 'Atas', dataUpload: '2026-03-22', ficheiroUrl: '', tamanho: '850 KB' }
-                ],
-                utilizadores: [
-                    { id: 'u1', nome: 'Administrador Sênior', email: 'admin@guardioesbravo.pt', perfil: 'Administrador', ultimoAcesso: '2026-10-23' },
-                    { id: 'u2', nome: 'Portaria & Segurança', email: 'portaria@guardioesbravo.pt', perfil: 'Operador', ultimoAcesso: '2026-10-22' }
-                ]
-            }),
-
-            // Garante inicialização e integridade
-            init: function() {
-                const seed = this.getInitialSeed();
-                Object.keys(seed).forEach(collection => {
-                    if (!localStorage.getItem(this.STORAGE_PREFIX + collection)) {
-                        this.saveCollection(collection, seed[collection]);
-                    }
-                });
-            },
-
-            getCollection: function(collectionName) {
+        class DBRepository {
+            static load() {
                 try {
-                    const data = localStorage.getItem(this.STORAGE_PREFIX + collectionName);
-                    return data ? JSON.parse(data) : [];
-                } catch (e) {
-                    console.error('Erro ao ler coleção do Storage:', collectionName, e);
-                    return [];
-                }
-            },
+                    const rawData = localStorage.getItem(STORAGE_KEY);
+                    if (!rawData) return DEFAULT_DATA;
+                    const parsed = JSON.parse(rawData);
+                    if (!parsed.estoque) parsed.estoque = DEFAULT_DATA.estoque;
+                    return parsed;
+                } catch (e) { return DEFAULT_DATA; }
+            }
 
-            saveCollection: function(collectionName, items) {
+            static save(data) {
                 try {
-                    localStorage.setItem(this.STORAGE_PREFIX + collectionName, JSON.stringify(items));
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
                     return true;
                 } catch (e) {
-                    console.error('Erro ao guardar no Storage:', collectionName, e);
-                    app.showToast('Erro de armazenamento! O limite de armazenamento local pode ter sido atingido.', 'error');
+                    alert('Aviso: Limite de armazenamento excedido.');
                     return false;
                 }
-            },
-
-            insert: function(collectionName, item) {
-                const items = this.getCollection(collectionName);
-                if (!item.id) item.id = DataUtils.generateId();
-                items.push(item);
-                this.saveCollection(collectionName, items);
-                return item;
-            },
-
-            update: function(collectionName, id, updatedFields) {
-                const items = this.getCollection(collectionName);
-                const index = items.findIndex(i => i.id === id);
-                if (index !== -1) {
-                    items[index] = { ...items[index], ...updatedFields };
-                    this.saveCollection(collectionName, items);
-                    return items[index];
-                }
-                return null;
-            },
-
-            delete: function(collectionName, id) {
-                let items = this.getCollection(collectionName);
-                items = items.filter(i => i.id !== id);
-                this.saveCollection(collectionName, items);
-            },
-
-            reset: function() {
-                localStorage.clear();
-                this.init();
             }
-        };
+        }
 
-        // ==========================================
-        // 3. APPLICATION LOGIC & CONTROLLER
-        // ==========================================
-        const app = {
-            currentTab: 'dashboard',
+        let db = DBRepository.load();
+        let sessao = { usuarioLogado: null };
 
-            init: function() {
-                DBRepository.init();
-                this.renderTabs();
-                this.checkStockAlerts();
-                this.navigate(this.currentTab);
-            },
+        try {
+            const sessaoData = sessionStorage.getItem('guardioes_sessao');
+            if (sessaoData) sessao.usuarioLogado = JSON.parse(sessaoData);
+        } catch (e) { sessao.usuarioLogado = null; }
 
-            tabs: [
-                { id: 'dashboard', label: 'Painel Geral', icon: 'fa-chart-pie' },
-                { id: 'estoque', label: 'Stock & Inventário', icon: 'fa-boxes-stacked' },
-                { id: 'financeiro', label: 'Pagar & Receber', icon: 'fa-wallet' },
-                { id: 'moradores', label: 'Moradores & Frações', icon: 'fa-users' },
-                { id: 'documentos', label: 'Documentos', icon: 'fa-folder-closed' },
-                { id: 'bancos', label: 'Contas & Meios', icon: 'fa-building-columns' },
-                { id: 'relatorios', label: 'Relatórios / DRE', icon: 'fa-file-invoice-dollar' },
-                { id: 'utilizadores', label: 'Utilizadores', icon: 'fa-user-shield' }
-            ],
+        let tabsState = { openTabs: ['estoque'], activeTab: 'estoque' };
+        let estFiltros = { categoria: 'Todas', status: 'Todos', busca: '' };
 
-            renderTabs: function() {
-                const navContainer = document.getElementById('main-nav-tabs');
-                navContainer.innerHTML = this.tabs.map(tab => `
-                    <button onclick="app.navigate('${tab.id}')" class="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${this.currentTab === tab.id ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}">
-                        <i class="fa-solid ${tab.icon}"></i>
-                        <span>${tab.label}</span>
-                    </button>
-                `).join('');
-            },
+        const MODULE_NAMES = { estoque: 'Estoque de Produtos' };
 
-            navigate: function(tabId) {
-                this.currentTab = tabId;
-                this.renderTabs();
-                const container = document.getElementById('app-view');
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return str || '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
 
-                switch (tabId) {
-                    case 'dashboard':
-                        this.renderDashboard(container);
-                        break;
-                    case 'estoque':
-                        this.renderEstoque(container);
-                        break;
-                    case 'financeiro':
-                        this.renderFinanceiro(container);
-                        break;
-                    case 'moradores':
-                        this.renderMoradores(container);
-                        break;
-                    case 'documentos':
-                        this.renderDocumentos(container);
-                        break;
-                    case 'bancos':
-                        this.renderBancos(container);
-                        break;
-                    case 'relatorios':
-                        this.renderRelatorios(container);
-                        break;
-                    case 'utilizadores':
-                        this.renderUtilizadores(container);
-                        break;
-                    default:
-                        container.innerHTML = `<div class="p-8 text-center text-slate-400">Módulo em desenvolvimento...</div>`;
-                }
-            },
+        function salvarDados(data) { DBRepository.save(data); }
 
-            checkStockAlerts: function() {
-                const estoque = DBRepository.getCollection('estoque');
-                const lowStockItems = estoque.filter(i => Number(i.quantidade) <= Number(i.quantMinima));
-                const alertPill = document.getElementById('stock-alert-pill');
-                const alertCount = document.getElementById('stock-alert-count');
+        // LEITOR DE CÓDIGO DE BARRAS VIA CÂMERA
+        function abrirModalScannerBarcode(callbackTargetInputId) {
+            const html = `
+                <div id="modal_barcode" class="fixed inset-0 bg-slate-900/90 z-[70] flex items-center justify-center p-4">
+                    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+                        <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                            <h3 class="font-bold text-sm"><i class="fa-solid fa-barcode text-teal-400 mr-2"></i> Ler Código de Barras</h3>
+                            <button onclick="fecharModalScannerBarcode()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="p-4 flex flex-col items-center">
+                            <div id="barcode_reader" class="w-full bg-slate-100 rounded-lg overflow-hidden border"></div>
+                            <p class="text-xs text-slate-500 mt-2 text-center font-bold">Aponte a câmera para o código de barras do produto.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 border-t flex justify-end">
+                            <button onclick="fecharModalScannerBarcode()" class="px-4 py-2 bg-slate-700 text-white rounded text-xs font-bold">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
 
-                if (lowStockItems.length > 0) {
-                    alertPill.classList.remove('hidden');
-                    alertPill.classList.add('flex');
-                    alertCount.textContent = `${lowStockItems.length} item(ns) com stock baixo`;
+            setTimeout(() => {
+                if (typeof Html5QrcodeScanner !== 'undefined') {
+                    html5QrCodeScannerInstance = new Html5QrcodeScanner("barcode_reader", { fps: 10, qrbox: { width: 250, height: 150 } });
+                    html5QrCodeScannerInstance.render((decodedText) => {
+                        if (callbackTargetInputId) {
+                            const target = document.getElementById(callbackTargetInputId);
+                            if (target) target.value = decodedText;
+                        } else {
+                            // Se for busca direta
+                            estFiltros.busca = decodedText;
+                        }
+                        fecharModalScannerBarcode();
+                        renderApp();
+                    }, (err) => {});
                 } else {
-                    alertPill.classList.add('hidden');
-                    alertPill.classList.remove('flex');
+                    alert('Biblioteca do leitor de código de barras não foi carregada.');
+                    fecharModalScannerBarcode();
                 }
-            },
+            }, 200);
+        }
 
-            showToast: function(msg, type = 'info') {
-                const toast = document.createElement('div');
-                const bg = type === 'error' ? 'bg-rose-900/90 border-rose-500 text-rose-100' : 'bg-emerald-900/90 border-emerald-500 text-emerald-100';
-                const icon = type === 'error' ? 'fa-circle-xmark' : 'fa-circle-check';
-                
-                toast.className = `flex items-center space-x-3 px-4 py-3 rounded-xl border shadow-xl backdrop-blur transition-all duration-300 transform translate-y-2 pointer-events-auto ${bg}`;
-                toast.innerHTML = `<i class="fa-solid ${icon}"></i><span class="text-sm font-medium">${msg}</span>`;
+        function fecharModalScannerBarcode() {
+            if (html5QrCodeScannerInstance) {
+                html5QrCodeScannerInstance.clear().catch(e => console.error(e));
+                html5QrCodeScannerInstance = null;
+            }
+            const modal = document.getElementById('modal_barcode');
+            if (modal) modal.remove();
+        }
 
-                const container = document.getElementById('toast-container');
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.classList.add('opacity-0', 'translate-y-4');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3500);
-            },
+        function abrirModulo(moduloId) {
+            tabsState.activeTab = moduloId;
+            renderApp();
+        }
 
-            closeModal: function() {
-                document.getElementById('global-modal').classList.add('hidden');
-            },
+        function renderApp() {
+            const container = document.getElementById('app');
+            if (!container) return;
 
-            openModal: function(title, bodyHtml) {
-                const container = document.getElementById('modal-content-container');
-                container.innerHTML = `
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">${title}</h3>
-                        <button onclick="app.closeModal()" class="text-slate-400 hover:text-white transition-colors">
-                            <i class="fa-solid fa-xmark text-xl"></i>
+            container.innerHTML = `
+                <div class="flex-1 flex flex-col min-h-screen">
+                    <header class="bg-slate-900 text-white p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded bg-teal-600 flex items-center justify-center font-bold"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h1 class="font-bold text-sm">Guardiões do Bravo - Módulo Estoque</h1>
+                        </div>
+                    </header>
+                    <main class="flex-1 p-4 md:p-6 bg-slate-100">
+                        ${renderEstoqueView()}
+                    </main>
+                </div>
+            `;
+        }
+
+        function renderEstoqueView() {
+            let list = db.estoque || [];
+
+            if (estFiltros.busca.trim() !== '') {
+                const b = estFiltros.busca.toLowerCase();
+                list = list.filter(e => 
+                    (e.item || '').toLowerCase().includes(b) || 
+                    (e.codigoBarras || '').toLowerCase().includes(b) ||
+                    (e.localizacao || '').toLowerCase().includes(b)
+                );
+            }
+
+            return `
+                <div class="space-y-4">
+                    <!-- BARRA DE PESQUISA COM BOTÃO DE SCANNER -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border flex flex-col sm:flex-row gap-3 items-center justify-between">
+                        <div class="flex-1 w-full flex items-center gap-2">
+                            <input type="text" id="flt_est_busca" value="${escapeHTML(estFiltros.busca)}" placeholder="Buscar por Nome ou Código de Barras..." oninput="atualizarFiltroBuscaEstoque()" class="w-full p-2.5 border rounded-lg text-xs font-bold">
+                            <button onclick="abrirModalScannerBarcode(null)" title="Escanear com Câmera" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow flex items-center gap-2 whitespace-nowrap">
+                                <i class="fa-solid fa-barcode text-teal-400"></i> Escanear Câmera
+                            </button>
+                        </div>
+                        <button onclick="renderModalEstoque()" class="w-full sm:w-auto px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-2 justify-center">
+                            <i class="fa-solid fa-plus"></i> Novo Item
                         </button>
                     </div>
-                    <div class="p-6">
-                        ${bodyHtml}
-                    </div>
-                `;
-                document.getElementById('global-modal').classList.remove('hidden');
-            },
 
-            resetDataConfirm: function() {
-                if (confirm('Atenção: Tem a certeza de que deseja repor todos os dados para os valores por omissão?')) {
-                    DBRepository.reset();
-                    this.checkStockAlerts();
-                    this.navigate(this.currentTab);
-                    this.showToast('Dados de teste restaurados com sucesso.');
-                }
-            },
-
-            // ==========================================
-            // MODULE RENDERERS
-            // ==========================================
-
-            // --- 1. DASHBOARD MODULE ---
-            renderDashboard: function(container) {
-                const moradores = DBRepository.getCollection('moradores');
-                const estoque = DBRepository.getCollection('estoque');
-                const financeiro = DBRepository.getCollection('financeiro');
-                const lowStock = estoque.filter(i => Number(i.quantidade) <= Number(i.quantMinima));
-
-                const totalReceber = financeiro.filter(f => f.tipo === 'RECEBER').reduce((acc, cur) => acc + (cur.valorTotal - cur.valorPago), 0);
-                const totalPagar = financeiro.filter(f => f.tipo === 'PAGAR').reduce((acc, cur) => acc + (cur.valorTotal - cur.valorPago), 0);
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <!-- Top Summary Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Moradores</span>
-                                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                                        <i class="fa-solid fa-users text-lg"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <span class="text-3xl font-bold text-white">${moradores.length}</span>
-                                    <span class="text-xs text-slate-400 ml-2">Frações registadas</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Valores a Receber</span>
-                                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                                        <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <span class="text-2xl font-bold text-emerald-400">${DataUtils.formatCurrency(totalReceber)}</span>
-                                    <span class="text-xs text-slate-400 block mt-0.5">Pendentes / Parciais</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contas a Pagar</span>
-                                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
-                                        <i class="fa-solid fa-file-invoice-dollar text-lg"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <span class="text-2xl font-bold text-rose-400">${DataUtils.formatCurrency(totalPagar)}</span>
-                                    <span class="text-xs text-slate-400 block mt-0.5">Compromissos pendentes</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Alertas de Stock</span>
-                                    <div class="w-10 h-10 rounded-xl ${lowStock.length > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-400'} flex items-center justify-center">
-                                        <i class="fa-solid fa-boxes-stacked text-lg"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <span class="text-3xl font-bold ${lowStock.length > 0 ? 'text-amber-400' : 'text-white'}">${lowStock.length}</span>
-                                    <span class="text-xs text-slate-400 ml-2">Itens em nível crítico</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Central Grid Section -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Stock Warning Card -->
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 lg:col-span-1 flex flex-col justify-between">
-                                <div>
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h3 class="text-base font-semibold text-white flex items-center gap-2">
-                                            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Stock Baixo / Alerta
-                                        </h3>
-                                        <button onclick="app.navigate('estoque')" class="text-xs text-emerald-400 hover:underline">Ver Todos</button>
-                                    </div>
-                                    ${lowStock.length === 0 ? `
-                                        <div class="py-12 text-center text-slate-500">
-                                            <i class="fa-solid fa-circle-check text-3xl mb-2 text-emerald-500/40"></i>
-                                            <p class="text-sm">Todos os inventários com níveis normais.</p>
-                                        </div>
-                                    ` : `
-                                        <div class="space-y-3">
-                                            ${lowStock.map(item => `
-                                                <div class="p-3 bg-slate-950/60 border border-amber-500/20 rounded-xl flex items-center justify-between">
-                                                    <div>
-                                                        <h4 class="text-sm font-medium text-slate-200">${item.nome}</h4>
-                                                        <span class="text-xs text-slate-400">Mín: ${item.quantMinima} | Atual: <span class="text-amber-400 font-bold">${item.quantidade}</span></span>
-                                                    </div>
-                                                    <button onclick="app.quickAddStockModal('${item.id}')" class="px-2.5 py-1 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-semibold">
-                                                        + Repor
-                                                    </button>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    `}
-                                </div>
-                                <button onclick="app.openNewInventarioModal()" class="w-full mt-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center justify-center space-x-2">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                    <span>Agendar Novo Balanço/Inventário</span>
-                                </button>
-                            </div>
-
-                            <!-- Financial Overview Chart Card -->
-                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 lg:col-span-2">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-base font-semibold text-white">Resumo do Módulo Financeiro</h3>
-                                    <span class="text-xs text-slate-400">Ano Corrente (2026)</span>
-                                </div>
-                                <div class="h-64 flex items-center justify-center">
-                                    <canvas id="dashboardChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Render Chart JS on Dashboard
-                setTimeout(() => {
-                    const ctx = document.getElementById('dashboardChart');
-                    if (ctx) {
-                        new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out'],
-                                datasets: [
-                                    {
-                                        label: 'Receitas (€)',
-                                        data: [1200, 1350, 1200, 1400, 1250, 1300, 1200, 1500, 1450, 1200],
-                                        backgroundColor: '#22c55e'
-                                    },
-                                    {
-                                        label: 'Despesas (€)',
-                                        data: [850, 920, 1100, 780, 890, 950, 1020, 880, 910, 560],
-                                        backgroundColor: '#f43f5e'
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { labels: { color: '#94a3b8' } }
-                                },
-                                scales: {
-                                    x: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
-                                    y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } }
-                                }
-                            }
-                        });
-                    }, 50);
-            },
-
-            // --- 2. STOCK & INVENTÁRIO MODULE ---
-            renderEstoque: function(container) {
-                const estoque = DBRepository.getCollection('estoque');
-                const inventarios = DBRepository.getCollection('inventarios');
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <!-- Header & Actions -->
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Gestão de Stock & Inventários</h2>
-                                <p class="text-xs text-slate-400">Controlo de consumíveis, materiais e agendamento de inventários.</p>
-                            </div>
-                            <div class="flex space-x-3">
-                                <button onclick="app.openNewInventarioModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-2">
-                                    <i class="fa-solid fa-calendar-plus"></i>
-                                    <span>Agendar Balanço</span>
-                                </button>
-                                <button onclick="app.openEstoqueModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Novo Item de Stock</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Stock Items Table -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-                                <h3 class="text-sm font-semibold text-slate-300">Itens em Stock</h3>
-                                <span class="text-xs text-slate-400">Total: ${estoque.length} registos</span>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-slate-300">
-                                    <thead class="bg-slate-950/50 text-xs uppercase text-slate-400 border-b border-slate-800">
-                                        <tr>
-                                            <th class="px-6 py-3">Código / Item</th>
-                                            <th class="px-6 py-3">Categoria</th>
-                                            <th class="px-6 py-3">Localização</th>
-                                            <th class="px-6 py-3">Qtd. Atual</th>
-                                            <th class="px-6 py-3">Mínimo</th>
-                                            <th class="px-6 py-3">Estado</th>
-                                            <th class="px-6 py-3 text-right">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-800/60">
-                                        ${estoque.map(item => {
-                                            const isLow = Number(item.quantidade) <= Number(item.quantMinima);
-                                            return `
-                                                <tr class="hover:bg-slate-800/30 transition-colors">
-                                                    <td class="px-6 py-4 font-medium text-white">
-                                                        <span class="text-xs text-emerald-400 block">${item.codigo || '-'}</span>
-                                                        ${item.nome}
-                                                    </td>
-                                                    <td class="px-6 py-4 text-slate-400">${item.categoria}</td>
-                                                    <td class="px-6 py-4 text-slate-400">${item.localizacao}</td>
-                                                    <td class="px-6 py-4 font-bold ${isLow ? 'text-amber-400' : 'text-slate-200'}">${item.quantidade}</td>
-                                                    <td class="px-6 py-4 text-slate-400">${item.quantMinima}</td>
-                                                    <td class="px-6 py-4">
-                                                        ${isLow ? 
-                                                            `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Baixo</span>` : 
-                                                            `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Normal</span>`
-                                                        }
-                                                    </td>
-                                                    <td class="px-6 py-4 text-right space-x-2">
-                                                        <button onclick="app.quickAddStockModal('${item.id}')" class="text-emerald-400 hover:text-emerald-300 p-1" title="Ajustar Quantidade">
-                                                            <i class="fa-solid fa-arrow-up-1-9"></i>
-                                                        </button>
-                                                        <button onclick="app.openEstoqueModal('${item.id}')" class="text-slate-400 hover:text-slate-200 p-1" title="Editar">
-                                                            <i class="fa-solid fa-pen-to-square"></i>
-                                                        </button>
-                                                        <button onclick="app.deleteEstoque('${item.id}')" class="text-rose-400 hover:text-rose-300 p-1" title="Eliminar">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Inventários Agendados Card Section -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                            <h3 class="text-base font-semibold text-white mb-4">Agendamentos de Inventários e Balanços</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                ${inventarios.map(inv => `
-                                    <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2 relative">
-                                        <div class="flex justify-between items-start">
-                                            <h4 class="font-semibold text-slate-200 text-sm">${inv.titulo}</h4>
-                                            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">${inv.estado}</span>
-                                        </div>
-                                        <p class="text-xs text-slate-400">${inv.observacoes}</p>
-                                        <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                                            <span><i class="fa-regular fa-calendar mr-1"></i>${DataUtils.formatDate(inv.dataAgendada)}</span>
-                                            <span><i class="fa-regular fa-user mr-1"></i>${inv.responsavel}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            openEstoqueModal: function(id = null) {
-                const item = id ? DBRepository.getCollection('estoque').find(i => i.id === id) : {};
-                const html = `
-                    <form onsubmit="app.saveEstoque(event, '${id || ''}')" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Código do Item</label>
-                                <input type="text" id="est-codigo" value="${item.codigo || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Nome do Item</label>
-                                <input type="text" id="est-nome" value="${item.nome || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Categoria</label>
-                                <input type="text" id="est-categoria" value="${item.categoria || 'Geral'}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Localização</label>
-                                <input type="text" id="est-localizacao" value="${item.localizacao || 'Depósito'}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Quantidade Atual</label>
-                                <input type="number" id="est-quantidade" value="${item.quantidade || 0}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Quantidade Mínima (Alerta)</label>
-                                <input type="number" id="est-quantMinima" value="${item.quantMinima || 5}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Guardar Item</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal(id ? 'Editar Item de Stock' : 'Novo Item de Stock', html);
-            },
-
-            saveEstoque: function(e, id) {
-                e.preventDefault();
-                const payload = {
-                    codigo: document.getElementById('est-codigo').value,
-                    nome: document.getElementById('est-nome').value,
-                    categoria: document.getElementById('est-categoria').value,
-                    localizacao: document.getElementById('est-localizacao').value,
-                    quantidade: Number(document.getElementById('est-quantidade').value),
-                    quantMinima: Number(document.getElementById('est-quantMinima').value)
-                };
-
-                if (id) {
-                    DBRepository.update('estoque', id, payload);
-                    this.showToast('Item atualizado com sucesso.');
-                } else {
-                    DBRepository.insert('estoque', payload);
-                    this.showToast('Novo item registado no stock.');
-                }
-
-                this.closeModal();
-                this.checkStockAlerts();
-                this.navigate('estoque');
-            },
-
-            deleteEstoque: function(id) {
-                if (confirm('Deseja realmente eliminar este item do stock?')) {
-                    DBRepository.delete('estoque', id);
-                    this.showToast('Item eliminado.');
-                    this.checkStockAlerts();
-                    this.navigate('estoque');
-                }
-            },
-
-            quickAddStockModal: function(id) {
-                const item = DBRepository.getCollection('estoque').find(i => i.id === id);
-                if (!item) return;
-
-                const html = `
-                    <form onsubmit="app.saveQuickStock(event, '${id}')" class="space-y-4">
-                        <p class="text-sm text-slate-300">Item: <strong class="text-white">${item.nome}</strong></p>
-                        <p class="text-xs text-slate-400">Quantidade atual em stock: <strong>${item.quantidade}</strong></p>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Nova Quantidade Total</label>
-                            <input type="number" id="quick-qtd" value="${item.quantidade}" min="0" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Atualizar Stock</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal('Ajustar Quantidade em Stock', html);
-            },
-
-            saveQuickStock: function(e, id) {
-                e.preventDefault();
-                const novaQtd = Number(document.getElementById('quick-qtd').value);
-                DBRepository.update('estoque', id, { quantidade: novaQtd });
-                this.closeModal();
-                this.checkStockAlerts();
-                this.showToast('Quantidade de stock ajustada.');
-                this.navigate(this.currentTab);
-            },
-
-            openNewInventarioModal: function() {
-                const html = `
-                    <form onsubmit="app.saveInventario(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Título do Balanço / Inventário</label>
-                            <input type="text" id="inv-titulo" placeholder="Ex: Inventário Trimestral" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Data Agendada</label>
-                                <input type="date" id="inv-data" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Responsável</label>
-                                <input type="text" id="inv-resp" placeholder="Nome do responsável" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Observações</label>
-                            <textarea id="inv-obs" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none"></textarea>
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Agendar Inventário</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal('Agendar Balanço de Inventário', html);
-            },
-
-            saveInventario: function(e) {
-                e.preventDefault();
-                const payload = {
-                    titulo: document.getElementById('inv-titulo').value,
-                    dataAgendada: document.getElementById('inv-data').value,
-                    responsavel: document.getElementById('inv-resp').value,
-                    observacoes: document.getElementById('inv-obs').value,
-                    estado: 'Agendado'
-                };
-                DBRepository.insert('inventarios', payload);
-                this.closeModal();
-                this.showToast('Inventário agendado com sucesso.');
-                this.navigate('estoque');
-            },
-
-            // --- 3. MÓDULO FINANCEIRO (PAGAR / RECEBER COM BAIXA PARCIAL) ---
-            renderFinanceiro: function(container) {
-                const financeiro = DBRepository.getCollection('financeiro');
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Gestão Financeira</h2>
-                                <p class="text-xs text-slate-400">Controlo de Contas a Pagar, Receber e Baixas Parciais.</p>
-                            </div>
-                            <button onclick="app.openFinanceiroModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Nova Lançamento</span>
-                            </button>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-slate-300">
-                                    <thead class="bg-slate-950/50 text-xs uppercase text-slate-400 border-b border-slate-800">
-                                        <tr>
-                                            <th class="px-6 py-3">Tipo</th>
-                                            <th class="px-6 py-3">Descrição</th>
-                                            <th class="px-6 py-3">Vencimento</th>
-                                            <th class="px-6 py-3">Valor Total</th>
-                                            <th class="px-6 py-3">Valor Liquidado</th>
-                                            <th class="px-6 py-3">Estado</th>
-                                            <th class="px-6 py-3 text-right">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-slate-800/60">
-                                        ${financeiro.map(f => {
-                                            const pendente = f.valorTotal - f.valorPago;
-                                            return `
-                                                <tr class="hover:bg-slate-800/30 transition-colors">
-                                                    <td class="px-6 py-4">
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${f.tipo === 'RECEBER' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
-                                                            ${f.tipo}
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-6 py-4 font-medium text-white">${f.descricao}</td>
-                                                    <td class="px-6 py-4 text-slate-400">${DataUtils.formatDate(f.dataVencimento)}</td>
-                                                    <td class="px-6 py-4 font-semibold text-slate-200">${DataUtils.formatCurrency(f.valorTotal)}</td>
-                                                    <td class="px-6 py-4 font-semibold text-emerald-400">${DataUtils.formatCurrency(f.valorPago)}</td>
-                                                    <td class="px-6 py-4">
-                                                        ${f.estado === 'PAGO' ? '<span class="px-2 py-0.5 text-xs rounded bg-emerald-500/10 text-emerald-400">Totalmente Pago</span>' : ''}
-                                                        ${f.estado === 'PARCIAL' ? `<span class="px-2 py-0.5 text-xs rounded bg-amber-500/10 text-amber-400">Parcial (Falta ${DataUtils.formatCurrency(pendente)})</span>` : ''}
-                                                        ${f.estado === 'PENDENTE' ? '<span class="px-2 py-0.5 text-xs rounded bg-slate-800 text-slate-400">Pendente</span>' : ''}
-                                                    </td>
-                                                    <td class="px-6 py-4 text-right space-x-2">
-                                                        ${f.estado !== 'PAGO' ? `
-                                                            <button onclick="app.openBaixaModal('${f.id}')" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg text-xs font-semibold">
-                                                                Dar Baixa
-                                                            </button>
-                                                        ` : ''}
-                                                        <button onclick="app.deleteFinanceiro('${f.id}')" class="text-rose-400 hover:text-rose-300 p-1">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            openFinanceiroModal: function() {
-                const categorias = DBRepository.getCollection('categorias');
-                const html = `
-                    <form onsubmit="app.saveFinanceiro(event)" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Tipo de Lançamento</label>
-                                <select id="fin-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                                    <option value="RECEBER">A Receber (Receita)</option>
-                                    <option value="PAGAR">A Pagar (Despesa)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Categoria</label>
-                                <select id="fin-categoria" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                                    ${categorias.map(c => `<option value="${c.id}">${c.nome}</option>`).join('')}
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Descrição</label>
-                            <input type="text" id="fin-descricao" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Valor Total (€)</label>
-                                <input type="number" step="0.01" id="fin-valor" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Data de Vencimento</label>
-                                <input type="date" id="fin-vencimento" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Guardar Lançamento</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal('Novo Lançamento Financeiro', html);
-            },
-
-            saveFinanceiro: function(e) {
-                e.preventDefault();
-                const payload = {
-                    tipo: document.getElementById('fin-tipo').value,
-                    categoriaId: document.getElementById('fin-categoria').value,
-                    descricao: document.getElementById('fin-descricao').value,
-                    valorTotal: Number(document.getElementById('fin-valor').value),
-                    valorPago: 0,
-                    dataVencimento: document.getElementById('fin-vencimento').value,
-                    estado: 'PENDENTE'
-                };
-                DBRepository.insert('financeiro', payload);
-                this.closeModal();
-                this.showToast('Lançamento financeiro adicionado.');
-                this.navigate('financeiro');
-            },
-
-            openBaixaModal: function(id) {
-                const item = DBRepository.getCollection('financeiro').find(f => f.id === id);
-                if (!item) return;
-                const pendente = item.valorTotal - item.valorPago;
-
-                const html = `
-                    <form onsubmit="app.saveBaixa(event, '${id}')" class="space-y-4">
-                        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                            <p class="text-xs text-slate-400">Lançamento: <span class="text-white font-medium">${item.descricao}</span></p>
-                            <p class="text-xs text-slate-400 mt-1">Valor Total: <span class="text-white">${DataUtils.formatCurrency(item.valorTotal)}</span> | Já Liquidado: <span class="text-emerald-400">${DataUtils.formatCurrency(item.valorPago)}</span></p>
-                            <p class="text-xs text-amber-400 font-semibold mt-1">Valor Em Falta: ${DataUtils.formatCurrency(pendente)}</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Valor da Baixa Afectado Agora (€)</label>
-                            <input type="number" step="0.01" id="baixa-valor" max="${pendente}" value="${pendente}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Confirmar Baixa</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal('Registar Baixa de Pagamento', html);
-            },
-
-            saveBaixa: function(e, id) {
-                e.preventDefault();
-                const item = DBRepository.getCollection('financeiro').find(f => f.id === id);
-                const valorBaixa = Number(document.getElementById('baixa-valor').value);
-
-                const novoValorPago = item.valorPago + valorBaixa;
-                let novoEstado = 'PARCIAL';
-                if (novoValorPago >= item.valorTotal) {
-                    novoEstado = 'PAGO';
-                }
-
-                DBRepository.update('financeiro', id, {
-                    valorPago: novoValorPago,
-                    estado: novoEstado,
-                    dataPagamento: new Date().toISOString().split('T')[0]
-                });
-
-                this.closeModal();
-                this.showToast('Baixa de pagamento registada.');
-                this.navigate('financeiro');
-            },
-
-            deleteFinanceiro: function(id) {
-                if (confirm('Eliminar registo financeiro?')) {
-                    DBRepository.delete('financeiro', id);
-                    this.showToast('Lançamento eliminado.');
-                    this.navigate('financeiro');
-                }
-            },
-
-            // --- 4. MORADORES MODULE ---
-            renderMoradores: function(container) {
-                const moradores = DBRepository.getCollection('moradores');
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Moradores & Frações</h2>
-                                <p class="text-xs text-slate-400">Registo de condóminos, inquilinos e frações.</p>
-                            </div>
-                            <button onclick="app.openMoradorModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Novo Morador</span>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${moradores.map(m => `
-                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 relative hover:border-slate-700 transition-colors">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="font-bold text-white text-base">${m.nome}</h3>
-                                            <span class="text-xs text-emerald-400 font-medium">${m.fracao}</span>
-                                        </div>
-                                        <span class="px-2 py-0.5 text-xs rounded bg-slate-800 text-slate-300 border border-slate-700">${m.tipo}</span>
-                                    </div>
-                                    <div class="space-y-1 text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-                                        <p><i class="fa-solid fa-phone w-4 text-slate-500"></i> ${m.telefone}</p>
-                                        <p><i class="fa-solid fa-envelope w-4 text-slate-500"></i> ${m.email}</p>
-                                    </div>
-                                    <div class="flex justify-end space-x-2 pt-2">
-                                        <button onclick="app.openMoradorModal('${m.id}')" class="text-xs text-slate-400 hover:text-white p-1">Editar</button>
-                                        <button onclick="app.deleteMorador('${m.id}')" class="text-xs text-rose-400 hover:text-rose-300 p-1">Eliminar</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            },
-
-            openMoradorModal: function(id = null) {
-                const item = id ? DBRepository.getCollection('moradores').find(m => m.id === id) : {};
-                const html = `
-                    <form onsubmit="app.saveMorador(event, '${id || ''}')" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo</label>
-                            <input type="text" id="mor-nome" value="${item.nome || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Fração / Apartamento</label>
-                                <input type="text" id="mor-fracao" value="${item.fracao || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Tipo</label>
-                                <select id="mor-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                                    <option value="Proprietário" ${item.tipo === 'Proprietário' ? 'selected' : ''}>Proprietário</option>
-                                    <option value="Inquilino" ${item.tipo === 'Inquilino' ? 'selected' : ''}>Inquilino</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Telefone</label>
-                                <input type="text" id="mor-telefone" value="${item.telefone || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
-                                <input type="email" id="mor-email" value="${item.email || ''}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                            </div>
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Guardar Morador</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal(id ? 'Editar Morador' : 'Novo Morador', html);
-            },
-
-            saveMorador: function(e, id) {
-                e.preventDefault();
-                const payload = {
-                    nome: document.getElementById('mor-nome').value,
-                    fracao: document.getElementById('mor-fracao').value,
-                    tipo: document.getElementById('mor-tipo').value,
-                    telefone: document.getElementById('mor-telefone').value,
-                    email: document.getElementById('mor-email').value,
-                };
-                if (id) {
-                    DBRepository.update('moradores', id, payload);
-                    this.showToast('Dados do morador atualizados.');
-                } else {
-                    DBRepository.insert('moradores', payload);
-                    this.showToast('Novo morador registado.');
-                }
-                this.closeModal();
-                this.navigate('moradores');
-            },
-
-            deleteMorador: function(id) {
-                if (confirm('Eliminar este morador?')) {
-                    DBRepository.delete('moradores', id);
-                    this.showToast('Morador eliminado.');
-                    this.navigate('moradores');
-                }
-            },
-
-            // --- 5. DOCUMENTOS COM COMPRESSÃO AUTOMÁTICA ---
-            renderDocumentos: function(container) {
-                const docs = DBRepository.getCollection('documentos');
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-white">Documentos & Atas Condominiais</h2>
-                                <p class="text-xs text-slate-400">Armazenamento otimizado com compressão de ficheiros anexados.</p>
-                            </div>
-                            <button onclick="app.openDocumentoModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <span>Carregar Documento</span>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${docs.map(d => `
-                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                                            <i class="fa-solid fa-file-pdf text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-white text-sm line-clamp-1">${d.titulo}</h4>
-                                            <span class="text-xs text-slate-400">${d.categoria}</span>
-                                        </div>
-                                    </div>
-                                    <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 flex justify-between">
-                                        <span>Data: ${DataUtils.formatDate(d.dataUpload)}</span>
-                                        <span>${d.tamanho || 'Otimizado'}</span>
-                                    </div>
-                                    <div class="flex space-x-2 pt-2">
-                                        ${d.ficheiroUrl ? `<button onclick="app.previewDoc('${d.id}')" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 rounded-lg">Pré-visualizar</button>` : '<span class="text-xs text-slate-500">Sem ficheiro associado</span>'}
-                                        <button onclick="app.deleteDoc('${d.id}')" class="px-2 py-1.5 bg-rose-500/10 text-rose-400 rounded-lg text-xs"><i class="fa-solid fa-trash-can"></i></button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            },
-
-            openDocumentoModal: function() {
-                const html = `
-                    <form onsubmit="app.saveDocumento(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Título do Documento</label>
-                            <input type="text" id="doc-titulo" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Categoria / Pasta</label>
-                            <select id="doc-categoria" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:border-emerald-500 outline-none">
-                                <option value="Atas">Atas de Assembleia</option>
-                                <option value="Regulamentos">Regulamentos</option>
-                                <option value="Contratos">Contratos de Fornecedores</option>
-                                <option value="Outros">Outros Documentos</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Anexo / Imagem (Compressão Automática)</label>
-                            <input type="file" id="doc-file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700">
-                        </div>
-                        <div class="flex justify-end space-x-3 pt-4">
-                            <button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold">Guardar Documento</button>
-                        </div>
-                    </form>
-                `;
-                this.openModal('Anexar Novo Documento', html);
-            },
-
-            saveDocumento: async function(e) {
-                e.preventDefault();
-                const fileInput = document.getElementById('doc-file');
-                let compressedBase64 = '';
-
-                if (fileInput.files.length > 0) {
-                    try {
-                        compressedBase64 = await DataUtils.compressImage(fileInput.files[0]);
-                    } catch (err) {
-                        console.warn('Ficheiro não é uma imagem processável. A guardar sem preview.', err);
-                    }
-                }
-
-                const payload = {
-                    titulo: document.getElementById('doc-titulo').value,
-                    categoria: document.getElementById('doc-categoria').value,
-                    dataUpload: new Date().toISOString().split('T')[0],
-                    ficheiroUrl: compressedBase64,
-                    tamanho: compressedBase64 ? 'Compressed JPG' : 'Doc Text'
-                };
-
-                DBRepository.insert('documentos', payload);
-                this.closeModal();
-                this.showToast('Documento guardado no repositório.');
-                this.navigate('documentos');
-            },
-
-            previewDoc: function(id) {
-                const doc = DBRepository.getCollection('documentos').find(d => d.id === id);
-                if (doc && doc.ficheiroUrl) {
-                    const html = `<div class="flex justify-center"><img src="${doc.ficheiroUrl}" class="max-h-96 rounded-xl border border-slate-800 shadow-lg"></div>`;
-                    this.openModal(doc.titulo, html);
-                }
-            },
-
-            deleteDoc: function(id) {
-                if (confirm('Eliminar documento?')) {
-                    DBRepository.delete('documentos', id);
-                    this.showToast('Documento removido.');
-                    this.navigate('documentos');
-                }
-            },
-
-            // --- 6. CONTAS BANCAIRAS & FORMAS MONETÁRIAS ---
-            renderBancos: function(container) {
-                const contas = DBRepository.getCollection('contasBancarias');
-                const formas = DBRepository.getCollection('formasPagamento');
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Contas Bancárias & Meios de Pagamento</h2>
-                            <p class="text-xs text-slate-400">Configuração de contas de tesouraria, fundo de reserva e métodos monetários.</p>
-                        </div>
-
-                        <!-- Contas Bancarias -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${contas.map(c => `
-                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="font-bold text-white text-base">${c.banco}</h3>
-                                            <span class="text-xs text-slate-400">${c.tipo}</span>
-                                        </div>
-                                        <span class="text-xs font-mono text-emerald-400 font-bold">${DataUtils.formatCurrency(c.saldoInicial)}</span>
-                                    </div>
-                                    <p class="text-xs font-mono text-slate-400 pt-2 border-t border-slate-800">IBAN: ${c.iban}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-
-                        <!-- Formas Monetarias -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                            <h3 class="text-base font-semibold text-white mb-3">Formas Monetárias Aceites</h3>
-                            <ul class="divide-y divide-slate-800">
-                                ${formas.map(f => `
-                                    <li class="py-2.5 flex justify-between items-center text-sm text-slate-300">
-                                        <span><i class="fa-solid fa-money-check-dollar mr-2 text-slate-500"></i>${f.nome}</span>
-                                        <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">Ativo</span>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            },
-
-            // --- 7. RELATÓRIOS & DRE CONDOMINIAL ---
-            renderRelatorios: function(container) {
-                const financeiro = DBRepository.getCollection('financeiro');
-                const totalReceitas = financeiro.filter(f => f.tipo === 'RECEBER').reduce((acc, c) => acc + c.valorPago, 0);
-                const totalDespesas = financeiro.filter(f => f.tipo === 'PAGAR').reduce((acc, c) => acc + c.valorPago, 0);
-                const resultadoOperacional = totalReceitas - totalDespesas;
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Demonstrativo de Resultados (DRE Condominial)</h2>
-                            <p class="text-xs text-slate-400">Visão consolidada de caixa e liquidações efetivas.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl mx-auto space-y-4">
-                            <h3 class="text-base font-bold text-white border-b border-slate-800 pb-3 text-center">DRE Simplificado - Exercício Atual</h3>
-                            
-                            <div class="space-y-3 text-sm">
-                                <div class="flex justify-between items-center text-slate-300">
-                                    <span>(+) Receitas Liquidadas</span>
-                                    <span class="font-semibold text-emerald-400">${DataUtils.formatCurrency(totalReceitas)}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-slate-300">
-                                    <span>(-) Despesas Pagas</span>
-                                    <span class="font-semibold text-rose-400">${DataUtils.formatCurrency(totalDespesas)}</span>
-                                </div>
-                                <div class="pt-3 border-t border-slate-800 flex justify-between items-center font-bold text-base">
-                                    <span class="text-white font-bold">(=) Resultado Líquido do Período</span>
-                                    <span class="${resultadoOperacional >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${DataUtils.formatCurrency(resultadoOperacional)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            // --- 8. GESTÃO DE UTILIZADORES ---
-            renderUtilizadores: function(container) {
-                const users = DBRepository.getCollection('utilizadores');
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Gestão de Utilizadores e Segurança</h2>
-                            <p class="text-xs text-slate-400">Controlo de perfis e acessos à plataforma.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                            <table class="w-full text-left text-sm text-slate-300">
-                                <thead class="bg-slate-950/50 text-xs uppercase text-slate-400 border-b border-slate-800">
+                    <!-- TABELA DE PRODUTOS -->
+                    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100 font-bold uppercase border-b">
                                     <tr>
-                                        <th class="px-6 py-3">Nome</th>
-                                        <th class="px-6 py-3">E-mail</th>
-                                        <th class="px-6 py-3">Perfil</th>
-                                        <th class="px-6 py-3">Último Acesso</th>
+                                        <th class="p-3">Item / Produto</th>
+                                        <th class="p-3">Código de Barras</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3">Qtd</th>
+                                        <th class="p-3 text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-800">
-                                    ${users.map(u => `
-                                        <tr>
-                                            <td class="px-6 py-4 font-semibold text-white">${u.nome}</td>
-                                            <td class="px-6 py-4 text-slate-400">${u.email}</td>
-                                            <td class="px-6 py-4"><span class="px-2 py-0.5 rounded text-xs bg-slate-800 border border-slate-700 text-slate-200">${u.perfil}</span></td>
-                                            <td class="px-6 py-4 text-slate-400">${DataUtils.formatDate(u.ultimoAcesso)}</td>
+                                <tbody class="divide-y">
+                                    ${list.length === 0 ? `<tr><td colspan="5" class="p-6 text-center text-slate-500 font-bold">Nenhum produto encontrado.</td></tr>` : ''}
+                                    ${list.map(e => `
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="p-3 font-bold text-slate-900">${escapeHTML(e.item)}</td>
+                                            <td class="p-3 font-mono text-slate-600">${e.codigoBarras ? `<i class="fa-solid fa-barcode mr-1 text-slate-400"></i> ${escapeHTML(e.codigoBarras)}` : '<span class="text-slate-400 italic">Sem código</span>'}</td>
+                                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200">${escapeHTML(e.categoria)}</span></td>
+                                            <td class="p-3 font-extrabold ${Number(e.qtd) <= Number(e.minimo) ? 'text-rose-600' : 'text-slate-800'}">${e.qtd}</td>
+                                            <td class="p-3 text-right">
+                                                <button onclick="renderModalEstoque('${e.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><i class="fa-solid fa-pen-to-square"></i></button>
+                                            </td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                `;
-            }
-        };
+                </div>
+            `;
+        }
 
-        // Initialize application on DOM load
-        window.onload = () => {
-            app.init();
-        };
+        function atualizarFiltroBuscaEstoque() {
+            estFiltros.busca = document.getElementById('flt_est_busca').value;
+            renderApp();
+        }
+
+        function renderModalEstoque(itemId = null) {
+            const e = itemId ? db.estoque.find(x => x.id === itemId) : null;
+            const html = `
+                <div id="modal_est" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+                        <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                            <h3 class="font-bold text-sm">${e ? 'Editar Item' : 'Novo Item com Código de Barras'}</h3>
+                            <button onclick="fecharModal('modal_est')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form onsubmit="salvarEstoqueForm(event, '${itemId || ''}')" class="p-6 space-y-3">
+                            <div><label class="block text-xs font-bold uppercase mb-1">Nome do Produto</label><input type="text" id="est_item" required value="${e ? escapeHTML(e.item) : ''}" class="w-full p-2 border rounded text-xs font-bold"></div>
+                            
+                            <div>
+                                <label class="block text-xs font-bold uppercase mb-1">Código de Barras (EAN-13 / QR)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="est_barcode" value="${e ? escapeHTML(e.codigoBarras || '') : ''}" placeholder="Digite ou escaneie..." class="w-full p-2 border rounded text-xs font-bold font-mono">
+                                    <button type="button" onclick="abrirModalScannerBarcode('est_barcode')" title="Ler Câmera" class="px-3 py-2 bg-slate-800 text-teal-400 hover:bg-slate-900 rounded font-bold text-xs flex items-center gap-1 whitespace-nowrap">
+                                        <i class="fa-solid fa-barcode"></i> Ler Câmera
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="block text-xs font-bold uppercase mb-1">Qtd Atual</label><input type="number" id="est_qtd" required value="${e ? e.qtd : 10}" class="w-full p-2 border rounded text-xs font-bold"></div>
+                                <div><label class="block text-xs font-bold uppercase mb-1">Qtd Mínima</label><input type="number" id="est_min" required value="${e ? e.minimo : 5}" class="w-full p-2 border rounded text-xs font-bold"></div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-3 border-t">
+                                <button type="button" onclick="fecharModal('modal_est')" class="px-3 py-2 bg-slate-200 rounded text-xs font-bold">Cancelar</button>
+                                <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded text-xs font-bold shadow">Salvar Item</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function salvarEstoqueForm(ev, itemId = '') {
+            ev.preventDefault();
+            const item = document.getElementById('est_item').value.trim();
+            const codigoBarras = document.getElementById('est_barcode').value.trim();
+            const qtd = parseInt(document.getElementById('est_qtd').value) || 0;
+            const min = parseInt(document.getElementById('est_min').value) || 0;
+
+            if (itemId) {
+                const e = db.estoque.find(x => x.id === itemId);
+                if (e) { e.item = item; e.codigoBarras = codigoBarras; e.qtd = qtd; e.minimo = min; }
+            } else {
+                db.estoque.push({ id: 'est_' + Date.now(), item, codigoBarras, categoria: 'Geral', qtd, minimo: min });
+            }
+
+            salvarDados(db); fecharModal('modal_est'); renderApp();
+        }
+
+        function fecharModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function iniciarAplicacao() { renderApp(); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciarAplicacao);
+        else iniciarAplicacao();
     </script>
 </body>
 </html>
